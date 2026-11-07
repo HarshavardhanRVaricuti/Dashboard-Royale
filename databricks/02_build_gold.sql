@@ -306,7 +306,7 @@ WITH totals AS (
   FROM player_period GROUP BY player_id
 ),
 ranked AS (
-  SELECT player_id, NTILE(10) OVER (ORDER BY total_theo DESC) AS theo_decile
+  SELECT player_id, NTILE(10) OVER (ORDER BY total_theo DESC, player_id) AS theo_decile
   FROM totals WHERE total_coin_in > 0
 )
 SELECT
@@ -354,7 +354,7 @@ GROUP BY ALL;
 
 -- MAGIC %md
 -- MAGIC ### `g_budget_plan`
--- MAGIC Cost = quantity × (unit cost + daily cost × max(0, 30 − lead days)). Benefits are estimates from the evidence above.
+-- MAGIC Cost = quantity × (unit cost + daily cost × max(0, 30 − lead days)). Benefits are estimates from the evidence above. Dollar amounts are written as `¤` and restored with `chr(36)`: SQL notebooks treat a dollar sign followed by a name as a widget reference.
 
 -- COMMAND ----------
 
@@ -364,25 +364,25 @@ WITH plan AS (
     ('A-INSPECT', 5,
      'M-1158, M-1054, M-1210, M-1181, M-5076',
      'Leak: M-1158 hits 38.5% of spins vs 31.5% published every month (z≈124) and holds 3.0% vs 10% theo. Others are the most negative luck z-scores — inspection rules them in or out.',
-     'If M-1158 is mis-set and fixed: ≈+$5.8k house win in the 29 effective days (7 pts of hold × ≈$87k/month coin-in), then ≈$6k every month after. Other 4: likely no finding (they look like luck).',
+     'If M-1158 is mis-set and fixed: ≈+¤5.8k house win in the 29 effective days (7 pts of hold × ≈¤87k/month coin-in), then ≈¤6k every month after. Other 4: likely no finding (they look like luck).',
      'High for M-1158 (pattern stable all six months). Low for the other four.',
      'Post-fix hit rate within ±1 pt of 31.5% and hold converging to 10% over 30 days — compare with machine-level 95% luck band.'),
     ('A-PROMO', 1,
      'One Fri–Sun slot tournament weekend, late July (14-day lead)',
-     'Winter Slot Tournament (Feb 21–23) ran +18% coin-in vs the weekday baseline (+$842k coin-in, ≈+$80k theo) with no dip on surrounding days.',
-     'Central ≈ +$40k theo (50% haircut for one prior example and summer softness). Range $0–$80k.',
+     'Winter Slot Tournament (Feb 21–23) ran +18% coin-in vs the weekday baseline (+¤842k coin-in, ≈+¤80k theo) with no dip on surrounding days.',
+     'Central ≈ +¤40k theo (50% haircut for one prior example and summer softness). Range ¤0–¤80k.',
      'Medium–high: single prior example — June demand was soft citywide (LVCVA visitors −11% YoY).',
      'Weekend coin-in vs the frozen weekday-mean forecast (model page) — check the following week for pull-forward — never target players by losses.'),
     ('A-WAYFINDING', 1,
      'Back Forty (Z-B40)',
      'Every theme earns 41–55% less theo per available hour in Back Forty than the same theme at Main Entrance. When the entrance–Back Forty walkway closed (Mar 3–Apr 6), Back Forty theo fell ≈30% and recovered after reopening: access drives this zone.',
-     'Central +5% Back Forty theo for 20 days ≈ +$13k theo — part may be shifted from other zones (new Aurora bank showed floor-wide play mostly redistributes).',
+     'Central +5% Back Forty theo for 20 days ≈ +¤13k theo — part may be shifted from other zones (new Aurora bank showed floor-wide play mostly redistributes).',
      'High: signage effect size is unknown and partly zero-sum.',
      'Difference-in-differences: Back Forty theo per available hour vs other zones, 20 days after vs 28 days before — Z-B40 counter entries (counter_status = ok only).'),
     ('A-HOLD', 1,
      'Remaining budget',
-     'Replacing the bottom-10 is not supported: 9 of 10 sit in Back Forty, 3 had partial exposure, and the in-slot replacement of M-1120 by M-5076 changed theo/hour only $6.00 → $6.39.',
-     'Avoids ≈$34k (10 leases) to $220k (10 purchases) for no measurable uplift.',
+     'Replacing the bottom-10 is not supported: 9 of 10 sit in Back Forty, 3 had partial exposure, and the in-slot replacement of M-1120 by M-5076 changed theo/hour only ¤6.00 → ¤6.39.',
+     'Avoids ≈¤34k (10 leases) to ¤220k (10 purchases) for no measurable uplift.',
      'n/a',
      'Revisit after wayfinding and inspection results.')
   AS t(action_type_id, quantity, targets, evidence, expected_effect, uncertainty, measurement)
@@ -394,8 +394,8 @@ SELECT
   p.targets,
   p.quantity * (a.unit_cost_cents + a.recurring_cost_cents_per_day * GREATEST(0, 30 - a.lead_days)) / 100.0 AS cost_usd,
   a.lead_days,
-  p.evidence,
-  p.expected_effect,
+  replace(p.evidence, '¤', chr(36)) AS evidence,
+  replace(p.expected_effect, '¤', chr(36)) AS expected_effect,
   p.uncertainty,
   p.measurement
 FROM plan p
