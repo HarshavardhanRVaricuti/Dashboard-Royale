@@ -2,7 +2,7 @@
 
 ## Luck, Location, or a Leak?
 
-> Management is about to replace the ten machines that earned the least. Your dashboard could stop an expensive mistake—or show that management is right.
+> Management is about to replace the ten machines that earned the least. Your dashboard could stop an expensive mistake-or show that management is right.
 >
 > Investigate six months at a fictional 300-machine casino. Explain what changed in demand, payouts, availability, and contribution. Show what tracked players wagered, received back, and actually won or lost. Recommend up to three actions within a $100,000 operations budget for the next 30 days, with evidence, uncertainty, and a way to measure success. Include one useful basic ML or time-series method. You may recommend an experiment, an inspection, or preserving the budget.
 
