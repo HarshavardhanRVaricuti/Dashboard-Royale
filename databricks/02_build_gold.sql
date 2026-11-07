@@ -306,7 +306,7 @@ WITH totals AS (
   FROM player_period GROUP BY player_id
 ),
 ranked AS (
-  SELECT player_id, NTILE(10) OVER (ORDER BY total_theo DESC, player_id) AS theo_decile
+  SELECT player_id, NTILE(10) OVER (ORDER BY ROUND(total_theo, 2) DESC, player_id) AS theo_decile
   FROM totals WHERE total_coin_in > 0
 )
 SELECT
