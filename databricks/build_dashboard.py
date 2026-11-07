@@ -8,8 +8,14 @@ import json
 import os
 import sys
 
-NS = sys.argv[1] if len(sys.argv) > 1 else "workspace.dashboard_royale"
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_royale.lvdash.json")
+# Databricks runs files without __file__ and passes its own launcher flags in sys.argv.
+_args = [a for a in sys.argv[1:] if not a.startswith("-") and a.count(".") == 1 and "/" not in a]
+NS = _args[0] if _args else "workspace.dashboard_royale"
+try:
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    _HERE = os.getcwd()
+OUT = os.path.join(_HERE, "dashboard_royale.lvdash.json")
 
 PERIOD = "gaming_date BETWEEN :start_date AND :end_date"
 
