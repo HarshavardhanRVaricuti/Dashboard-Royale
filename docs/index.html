@@ -120,33 +120,235 @@
   .detail.show { display: block; }
   footer { color: var(--muted); font-size: 12px; padding: 24px 0 40px; }
   .loading { padding: 60px 0; text-align: center; color: var(--muted); }
+
+  /* Casino dressing: decorative only. Numbers, tables and charts are unchanged. */
+  :root {
+    --bulb-off: #5C4618;
+    --bulb: radial-gradient(circle, #FFF8D6 0 1.6px, #FFD24A 2.6px, rgba(255, 210, 74, .35) 4.6px, transparent 6.5px);
+    --bulb-dim: radial-gradient(circle, var(--bulb-off) 0 2.4px, transparent 3.4px);
+  }
+  html, body { overflow-x: hidden; }
+  body { background:
+    radial-gradient(ellipse at 50% -10%, rgba(139, 92, 246, .28), transparent 42%),
+    repeating-linear-gradient(45deg, rgba(139, 92, 246, .05) 0 12px, transparent 12px 24px),
+    repeating-linear-gradient(-45deg, rgba(250, 204, 21, .04) 0 12px, transparent 12px 24px),
+    var(--bg); }
+  header, main, .hero-wrap, .controls { position: relative; z-index: 1; }
+  .lights { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .vignette { position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 50% 40%, transparent 58%, rgba(8, 4, 16, .4) 100%); }
+  .beam { position: absolute; top: -30vh; width: 34vw; height: 150vh; transform-origin: 50% 0; filter: blur(34px);
+    background: linear-gradient(180deg, rgba(var(--accent-rgb), .22), transparent 70%); animation: sweep 13s ease-in-out infinite alternate; }
+  .beam.b2 { left: auto; right: 2vw; background: linear-gradient(180deg, rgba(var(--alert-rgb), .16), transparent 70%); animation-duration: 17s; animation-direction: alternate-reverse; }
+  .beam.b3 { left: 36vw; background: linear-gradient(180deg, rgba(250, 204, 21, .12), transparent 62%); animation-duration: 21s; }
+  .beam.b1 { left: 2vw; }
+  @keyframes sweep { from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+
+  .tower { position: fixed; top: 0; bottom: 0; width: 22px; z-index: 3; pointer-events: none;
+    background: var(--bulb) 50% 0 / 14px 54px repeat-y, var(--bulb-dim) 50% 0 / 14px 18px repeat-y, #170F29;
+    box-shadow: 0 0 18px rgba(250, 204, 21, .35); animation: chase-y 1s steps(3) infinite; }
+  .tower.left { left: 0; } .tower.right { right: 0; }
+  @keyframes chase-y { to { background-position: 50% 54px, 50% 0; } }
+
+  .float { position: absolute; bottom: -90px; font: 30px/1 "DM Serif Display", serif; color: rgba(var(--accent-rgb), .18); animation: rise linear infinite; }
+  .float.chip { width: 36px; height: 36px; border-radius: 50%; border: 5px dashed rgba(250, 204, 21, .35); background: radial-gradient(circle at 35% 30%, rgba(250, 204, 21, .25), rgba(250, 204, 21, .06)); }
+  .float.pcard { width: 44px; height: 62px; border-radius: 5px; background: #F8FAFC; color: #1E1433; font: 700 16px/1 "DM Serif Display", serif;
+    display: grid; place-items: center; box-shadow: 0 8px 16px rgba(0, 0, 0, .35); }
+  .float.pcard.red { color: #E11D48; }
+  @keyframes rise { to { transform: translateY(-125vh) rotate(380deg); } }
+
+  .bulbs { height: 14px; background: var(--bulb) 0 50% / 54px 14px repeat-x, var(--bulb-dim) 0 50% / 18px 14px repeat-x; animation: chase 1s steps(3) infinite; }
+  .bulbs.slim { height: 8px; background-size: 36px 8px, 12px 8px; }
+  @keyframes chase { to { background-position: 54px 50%, 0 50%; } }
+  header { border-bottom: 0; box-shadow: 0 6px 30px rgba(var(--accent-rgb), .25); }
+  header .bulbs { background-color: #170F29; }
+  .logo { animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow { 50% { box-shadow: 0 0 22px rgba(var(--accent-rgb), .9), 0 0 8px var(--gold); } }
+
+  .ticker { overflow: hidden; background: #0B0614; border-bottom: 1px solid rgba(250, 204, 21, .35); height: 28px; }
+  .ticker-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+  .ticker-track span { padding: 5px 0; font: 700 11px/18px Inter, system-ui, sans-serif; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+  .ticker-track b { color: var(--red); font-weight: 700; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  .lit { position: relative; isolation: isolate; }
+  .lit::before, .lit::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
+    background: var(--bulb) left 0 top 0 / 24px 14px repeat-x, var(--bulb) left 0 bottom 0 / 24px 14px repeat-x,
+      var(--bulb) left 0 top 0 / 14px 24px repeat-y, var(--bulb) right 0 top 0 / 14px 24px repeat-y;
+    animation: blink 1.1s steps(1) infinite; }
+  .lit::after { background-position: left 12px top 0, left 12px bottom 0, left 0 top 12px, right 0 top 12px; animation-delay: -.55s; }
+  @keyframes blink { 50% { opacity: .18; } }
+
+  .hero { padding: 22px 0 14px; }
+  .sign { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; padding: 30px 34px; border-radius: 20px;
+    background: radial-gradient(ellipse at 15% 0%, rgba(var(--accent-rgb), .28), transparent 60%),
+      radial-gradient(ellipse at 100% 100%, rgba(var(--alert-rgb), .16), transparent 55%), #1A1030;
+    box-shadow: 0 0 0 2px #3A2A10, 0 0 40px rgba(250, 204, 21, .18), inset 0 0 60px rgba(0, 0, 0, .45); }
+  .sign h1 { text-shadow: 0 0 18px rgba(var(--accent-rgb), .55), 0 0 2px #fff; }
+  .sign .eyebrow { text-shadow: 0 0 10px rgba(250, 204, 21, .7); }
+  .suits { color: var(--gold); letter-spacing: .4em; font-size: 13px; opacity: .8; margin-bottom: 4px; }
+  .suits .r { color: var(--red); }
+  .hand { display: flex; gap: 6px; margin-top: 16px; }
+  .hand .pcard { width: 38px; height: 54px; border-radius: 5px; background: #F8FAFC; color: #1E1433; font: 700 14px/1 "DM Serif Display", serif;
+    display: grid; place-items: center; box-shadow: 0 6px 12px rgba(0, 0, 0, .35); transform-origin: 50% 100%; animation: nudge 3.6s ease-in-out infinite; }
+  .hand .pcard.red { color: #E11D48; }
+  .hand .pcard:nth-child(1) { transform: rotate(-14deg); animation-delay: 0s; }
+  .hand .pcard:nth-child(2) { transform: rotate(-7deg); animation-delay: .15s; }
+  .hand .pcard:nth-child(3) { transform: rotate(0deg); animation-delay: .3s; }
+  .hand .pcard:nth-child(4) { transform: rotate(7deg); animation-delay: .45s; }
+  .hand .pcard:nth-child(5) { transform: rotate(14deg); animation-delay: .6s; }
+  @keyframes nudge { 50% { translate: 0 -4px; } }
+
+  .slot { position: relative; width: 236px; padding: 14px 14px 18px; border-radius: 22px 22px 14px 14px;
+    background: linear-gradient(160deg, #8B5CF6, #4C1D95 55%, #2E1065); box-shadow: 0 0 0 3px #FACC15, 0 0 26px rgba(250, 204, 21, .45), inset 0 2px 0 rgba(255, 255, 255, .35); }
+  .slot-top { text-align: center; font: 700 15px/1 Inter, system-ui, sans-serif; letter-spacing: .3em; color: #3B0A14; padding: 7px 0;
+    margin-bottom: 10px; border-radius: 10px; background: linear-gradient(#FFE38A, #FACC15); box-shadow: 0 0 14px rgba(250, 204, 21, .8); }
+  .slot.win .slot-top { animation: jackpot .25s steps(1) 10; }
+  @keyframes jackpot { 50% { background: #FF4D8D; color: #fff; box-shadow: 0 0 22px #FF4D8D; } }
+  .reels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; border-radius: 10px; background: #0B0614; box-shadow: inset 0 0 0 2px #FACC15; }
+  .reel { height: 64px; overflow: hidden; border-radius: 6px; background: linear-gradient(#ddd, #fff 30%, #fff 70%, #ccc); position: relative; }
+  .reel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,.35), transparent 30%, transparent 70%, rgba(0,0,0,.35)); pointer-events: none; }
+  .strip div { height: 64px; display: grid; place-items: center; font: 700 34px/1 "DM Serif Display", serif; color: #1E1433; }
+  .strip .s7 { color: #E11D48; } .strip .sb { color: #7C3AED; font-style: italic; } .strip .sr { color: #E11D48; }
+  .strip .bar { font: 800 15px/1 Inter, system-ui, sans-serif; letter-spacing: .05em; }
+  .strip .bar span { border: 2px solid currentColor; padding: 3px 5px; border-radius: 4px; }
+  .slot.win .reel { box-shadow: 0 0 0 2px #FF4D8D, 0 0 16px #FF4D8D; }
+  .slot-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 11px; color: #EDE9FE; }
+  .slot-foot b { color: #FACC15; font-variant-numeric: tabular-nums; }
+  .lever { position: absolute; right: -26px; top: 46px; width: 22px; height: 110px; border: 0; padding: 0; background: none; cursor: pointer; z-index: 3; }
+  .lever::before { content: ""; position: absolute; left: 8px; top: 16px; width: 6px; height: 86px; border-radius: 3px; background: linear-gradient(90deg, #9CA3AF, #F3F4F6, #9CA3AF); transform-origin: 50% 100%; transition: transform .25s; }
+  .lever::after { content: ""; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFB3CC, #FF4D8D 55%, #9F1239); box-shadow: 0 0 12px #FF4D8D; transition: transform .25s; }
+  .lever.pull::before { transform: scaleY(-.3); } .lever.pull::after { transform: translateY(70px); }
+  .lever:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 6px; }
+  .coin { position: absolute; width: 14px; height: 14px; border-radius: 50%; pointer-events: none; z-index: 4;
+    background: radial-gradient(circle at 30% 30%, #fff, #FACC15 40%, #A16207); animation: pop .9s ease-out forwards; }
+  @keyframes pop { to { transform: translate(var(--x), var(--y)) scale(.4); opacity: 0; } }
+
+  .controls { border-color: rgba(250, 204, 21, .25); background: rgba(18, 10, 31, .92); backdrop-filter: blur(8px); }
+  nav { padding: 10px 14px; box-shadow: inset 0 0 0 1px rgba(250, 204, 21, .18); }
+  nav button.on { box-shadow: 0 0 12px rgba(var(--accent-rgb), .6), 0 0 0 1px rgba(250, 204, 21, .6); }
+  h2 { text-shadow: 0 0 12px rgba(var(--accent-rgb), .25); }
+  .kpi.feature.lit { overflow: hidden; }
+  .card:not(.lit)::after { content: "♦"; position: absolute; top: 8px; right: 12px; font-size: 13px; color: var(--gold); opacity: .22; pointer-events: none; }
+  .card:not(.lit):nth-of-type(2n)::after { content: "♠"; color: var(--ink); }
+  .card:not(.lit):nth-of-type(3n)::after { content: "♥"; color: var(--red); }
+  .card { position: relative; transition: box-shadow .3s, border-color .3s; box-shadow: 0 0 0 1px rgba(250, 204, 21, .08); }
+  .card:hover { border-color: rgba(250, 204, 21, .45); box-shadow: 0 0 0 1px rgba(250, 204, 21, .25), 0 0 26px rgba(var(--accent-rgb), .25); }
+  .felt { padding: 24px 26px; background:
+    radial-gradient(ellipse at 50% 0%, rgba(250, 204, 21, .12), transparent 55%),
+    radial-gradient(ellipse at 50% 100%, #0d3b28, #082016);
+    box-shadow: inset 0 0 0 6px #5c3a14, inset 0 0 0 8px #d4a017, 0 0 24px rgba(250, 204, 21, .12); }
+  .felt h2, .felt .sub, .felt .rec-h, .felt .rec p { color: #F5F3FF; }
+  .felt .rec { background: rgba(8, 20, 14, .45); border-color: rgba(250, 204, 21, .28); }
+  .footer-bulbs { margin: 8px 0 0; border-radius: 7px; }
+
+  .chat-open { position: fixed; right: 22px; bottom: 22px; z-index: 8; border: 0; cursor: pointer; height: 46px; padding: 0 16px;
+    border-radius: 999px; background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #fff; font: 600 13px/1 Inter, system-ui, sans-serif;
+    box-shadow: 0 0 0 2px #FACC15, 0 8px 24px rgba(var(--accent-rgb), .45); }
+  .chat-open:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .chat { position: fixed; right: 22px; bottom: 78px; z-index: 8; width: min(380px, calc(100vw - 32px));
+    display: flex; flex-direction: column; max-height: min(560px, calc(100vh - 110px)); padding: 0; overflow: hidden; }
+  .chat[hidden] { display: none; }
+  .chat-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px;
+    background: linear-gradient(135deg, #8B5CF6, #4C1D95); color: #fff; }
+  .chat-h b { font: 18px "DM Serif Display", serif; }
+  .chat-x { border: 0; background: transparent; color: #fff; font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
+  .chat-note { margin: 0; padding: 8px 14px; font-size: 11.5px; color: var(--muted); background: #170F29; }
+  .chat-log { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-height: 180px; }
+  .bubble { max-width: 92%; padding: 8px 10px; border-radius: 10px; font-size: 13px; line-height: 1.45; white-space: pre-wrap; }
+  .bubble.bot { align-self: flex-start; background: var(--track); }
+  .bubble.me { align-self: flex-end; background: rgba(var(--accent-rgb), .28); }
+  .bubble .src { margin: 6px 0 0; }
+  .chat-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 8px; }
+  .chat-chips button { border: 1px solid var(--line); background: var(--track); color: var(--ink); border-radius: 999px;
+    font: 12px Inter, system-ui, sans-serif; padding: 4px 10px; cursor: pointer; }
+  .chat-form { display: flex; gap: 8px; padding: 10px 14px 14px; border-top: 1px solid var(--line); }
+  .chat-form input { flex: 1; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; height: 36px; padding: 0 10px; font: inherit; }
+  .chat-form button { border: 0; background: var(--green); color: var(--on-accent); font: 600 13px Inter, system-ui, sans-serif; border-radius: 8px; padding: 0 12px; cursor: pointer; }
+
+  button.flip { display: block; font: inherit; color: inherit; text-align: left; width: 100%; cursor: pointer; padding: 0; overflow: hidden;
+    perspective: 900px; min-height: 132px; }
+  button.flip::after { display: none; }
+  button.flip:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .flip-inner { display: block; width: 100%; position: relative; transform-style: preserve-3d; min-height: 132px;
+    transition: transform .55s cubic-bezier(.4,.2,.2,1), height .35s ease; }
+  .flip-face { display: block; position: absolute; left: 0; top: 0; width: 100%; box-sizing: border-box; padding: 20px 22px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .g3eq { grid-template-columns: repeat(3, 1fr); }
+  .flip-front { display: flex; flex-direction: column; justify-content: center; min-height: 132px; gap: 6px; }
+  .flip-back { transform: rotateY(180deg); }
+  .flip-back p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+  .flip-back p:last-child { margin: 0; }
+  .flip.on .flip-inner { transform: rotateY(180deg); }
+  .flip.on { border-color: rgba(250, 204, 21, .55); box-shadow: 0 0 0 1px rgba(250, 204, 21, .28), 0 0 22px rgba(var(--accent-rgb), .28); }
+  .flip-hint { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .flip-title { font: 30px/1.08 "DM Serif Display", serif; color: var(--ink); text-shadow: 0 0 14px rgba(var(--accent-rgb), .35); }
+  .flip-sub { color: var(--muted); font-size: 13px; }
+  .flips { margin-bottom: 16px; }
+  .flips-row { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+  .flip-filters { display: flex; align-items: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beam, .float, .bulbs, .tower, .lit::before, .lit::after, .slot.win .slot-top, .ticker-track, .logo, .hand .pcard { animation: none !important; }
+    .float, .tower, .vignette { display: none; }
+    .flip-inner { transition: none; transform: none !important; }
+    .flip-back { transform: none; display: none; }
+    .flip.on .flip-front { display: none; }
+    .flip.on .flip-back { display: block; position: relative; }
+  }
+  @media (max-width: 1280px) { .tower { display: none; } }
   @media (max-width: 900px) {
-    .g2, .g3 { grid-template-columns: 1fr; }
+    .sign { grid-template-columns: 1fr; padding: 26px 22px; }
+    .slot { margin: 0 auto; }
+    .g2, .g3, .g3eq, .flips-row { grid-template-columns: 1fr; }
     .g4, .g6 { grid-template-columns: 1fr 1fr; }
-    .controls { position: static; }
+    .controls { position: relative; }
     h1 { font-size: 34px; }
     .tag { display: none; }
+    .hand { justify-content: center; }
   }
 </style>
 </head>
 <body>
+<div class="lights" id="lights" aria-hidden="true"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div></div>
+<div class="tower left" aria-hidden="true"></div>
+<div class="tower right" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
 <header>
+  <div class="bulbs" aria-hidden="true"></div>
   <div class="wrap">
     <div class="brand"><div class="logo" aria-hidden="true">β</div>The Gilded Ace · Floor analytics<span class="team">by Beta Dancers</span></div>
     <div class="tag">Dashboard Royale · built on Databricks Free Edition</div>
   </div>
+  <div class="bulbs" aria-hidden="true"></div>
 </header>
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
 
-<main class="wrap">
+<div class="hero-wrap wrap">
   <section class="hero">
-    <div class="eyebrow">Luck, location, or a leak?</div>
-    <h1><span class="h1-lead">Don't replace the bottom 10.</span><span>Move the question.</span></h1>
-    <p class="sub">The manager's list mostly measures <b>where</b> machines sit, not <b>what</b> they are. One machine shows a real payout anomaly worth inspecting. Every number below is recomputed in your browser from the Databricks gold tables for the period you choose.</p>
-    <div class="note">♦ The Gilded Ace is fictional and its data synthetic (TAMU Datathon <i>Dashboard Royale</i>). Only Las Vegas visitation (LVCVA) and Missouri slot benchmarks are real.</div>
+    <div class="sign lit">
+      <div>
+        <div class="suits" aria-hidden="true">♠ <span class="r">♥</span> ♣ <span class="r">♦</span></div>
+        <div class="eyebrow">Luck, location, or a leak?</div>
+        <h1><span class="h1-lead">Don't replace the bottom 10.</span><span>Move the question.</span></h1>
+        <p class="sub">The manager's list mostly measures <b>where</b> machines sit, not <b>what</b> they are. One machine shows a real payout anomaly worth inspecting. Every number below is recomputed in your browser from the Databricks gold tables for the period you choose.</p>
+        <div class="note">♦ The Gilded Ace is fictional and its data synthetic (TAMU Datathon <i>Dashboard Royale</i>). Only Las Vegas visitation (LVCVA) and Missouri slot benchmarks are real.</div>
+        <div class="hand" aria-hidden="true">
+          <div class="pcard">A♠</div><div class="pcard red">K♥</div><div class="pcard">Q♣</div><div class="pcard red">J♦</div><div class="pcard">10♠</div>
+        </div>
+      </div>
+      <div class="slot" id="slot">
+        <div class="slot-top">JACKPOT</div>
+        <div class="reels" aria-hidden="true"><div class="reel"><div class="strip"></div></div><div class="reel"><div class="strip"></div></div><div class="reel"><div class="strip"></div></div></div>
+        <div class="slot-foot"><span>Published hit <b>31.5%</b></span><span>M-1158 <b>38.5%</b></span></div>
+        <button class="lever" id="lever" type="button" aria-label="Pull the lever to spin the reels" title="Pull to spin"></button>
+      </div>
+    </div>
   </section>
-</main>
+</div>
 
 <div class="controls">
+  <div class="bulbs slim" aria-hidden="true"></div>
   <div class="wrap">
     <label class="ctl">From <input type="date" id="start" min="2025-01-01" max="2025-06-30" value="2025-01-01"></label>
     <label class="ctl">To <input type="date" id="end" min="2025-01-01" max="2025-06-30" value="2025-06-30"></label>
@@ -162,7 +364,7 @@
 </div>
 
 <main class="wrap">
-  <nav id="tabs" aria-label="Dashboard pages">
+  <nav id="tabs" class="lit" aria-label="Dashboard pages">
     <button data-t="decision" class="on">1 · Decision</button>
     <button data-t="machines">2 · Machines</button>
     <button data-t="demand">3 · Demand</button>
@@ -179,7 +381,7 @@
   <!-- 1 Decision -->
   <section class="tab on" id="t-decision">
     <div class="grid g4">
-      <div class="card kpi feature"><div class="label">House win (period)<span class="scope-tag" data-scope></span></div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
+      <div class="card kpi feature lit"><div class="label">House win (period)<span class="scope-tag" data-scope></span></div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
       <div class="card kpi"><div class="label">Observed hold vs theo hold<span class="scope-tag" data-scope></span></div><div class="value" id="k-hold">–</div><div class="foot" id="k-hold-f">–</div></div>
       <div class="card kpi"><div class="label">Budget spent</div><div class="value" id="k-spent">–</div><div class="foot">3 action types, 30 days from Jul 1</div></div>
       <div class="card kpi"><div class="label">Budget kept</div><div class="value" id="k-kept">–</div><div class="foot">Of $100,000</div></div>
@@ -190,7 +392,7 @@
         <div class="table-scroll"><table id="bottom10"></table></div>
         <div class="src">Source: <code>g_machine_day</code> → luck z, hit z, exposure per machine · same logic as <code>g_machine_scorecard</code></div>
       </div>
-      <div class="card">
+      <div class="card felt">
         <h2>What we'd do with $100k</h2>
         <p class="sub">Three actions, 30 days from Jul 1. Most of the budget stays put.</p>
         <ul class="recs">
@@ -227,8 +429,25 @@
 
   <!-- 2 Machines -->
   <section class="tab" id="t-machines">
-    <div class="card story" style="margin-bottom:16px">
-      <p><b>Luck z</b> = (house win − theo) ÷ its standard deviation (Σ bet² × each game's per-spin payout variance); |z| &lt; 2 is ordinary luck. <b>Hit z</b> compares payout-positive spins with the published hit probability; a large value means the game isn't behaving like its math — a lead to inspect, not proof of wrongdoing. <b>Theo per available hour</b> removes luck and downtime: it is demand for the machine where it stands.</p>
+    <div class="grid g3eq flips">
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Luck z</span><span class="flip-sub">House win vs theo</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>Luck z</b> = (house win − theo) ÷ its standard deviation (Σ bet² × each game's per-spin payout variance). |z| &lt; 2 is ordinary luck.</p></span>
+        </span>
+      </button>
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Hit z</span><span class="flip-sub">Leak test</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>Hit z</b> compares payout-positive spins with the published hit probability. A large value means the game isn't behaving like its math — a lead to inspect, not proof of wrongdoing.</p></span>
+        </span>
+      </button>
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Theo / hour</span><span class="flip-sub">Demand, not luck</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>Theo per available hour</b> removes luck and downtime: it is demand for the machine where it stands.</p></span>
+        </span>
+      </button>
     </div>
     <div class="card" style="margin-bottom:16px">
       <div class="head">
@@ -246,8 +465,25 @@
 
   <!-- 3 Demand -->
   <section class="tab" id="t-demand">
-    <div class="card story" style="margin-bottom:16px">
-      <p><b>Three drivers.</b> Weekday rhythm (Saturday ≈ +60% vs Tuesday) · events (sports weekends and the casino's slot tournament +16–23%, conventions little) · access: the Main Entrance → Back Forty walkway closed for renovation Mar 3 – Apr 6 and Back Forty theo fell ≈30%, then recovered. June softened with Las Vegas visitation.</p>
+    <div class="grid g3eq flips">
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Weekday</span><span class="flip-sub">Saturday vs Tuesday</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p>On days without events, Saturday runs ≈60% above Tuesday. That rhythm is the base the event and walkway tests sit on.</p></span>
+        </span>
+      </button>
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Events</span><span class="flip-sub">Sports &amp; tournament</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p>Sports weekends and the casino's slot tournament added 16–23% coin-in. Conventions added little.</p></span>
+        </span>
+      </button>
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Access</span><span class="flip-sub">Back Forty walkway</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p>The Main Entrance → Back Forty walkway closed for renovation Mar 3 – Apr 6. Back Forty theo fell ≈30%, then recovered. June softened with Las Vegas visitation.</p></span>
+        </span>
+      </button>
     </div>
     <div class="grid g3">
       <div class="card"><h2>Daily coin-in<span class="scope-tag" data-scope></span></h2><p class="sub">Shaded days had an event.</p><div class="chart" id="c-daily"></div></div>
@@ -266,7 +502,7 @@
   <!-- 4 Downtime -->
   <section class="tab" id="t-downtime">
     <div class="grid g4">
-      <div class="card kpi feature"><div class="label">Downtime</div><div class="value" id="k-down">–</div><div class="foot" id="k-down-f">–</div></div>
+      <div class="card kpi feature lit"><div class="label">Downtime</div><div class="value" id="k-down">–</div><div class="foot" id="k-down-f">–</div></div>
       <div class="card kpi"><div class="label">Lost theo (upper bound)</div><div class="value" id="k-lost">–</div><div class="foot">Down hours × machine's own theo per available hour</div></div>
       <div class="card kpi"><div class="label">Fault tickets</div><div class="value" id="k-faults">–</div><div class="foot" id="k-faults-f">–</div></div>
       <div class="card kpi"><div class="label">Average wait for a tech</div><div class="value" id="k-wait">–</div><div class="foot">Ticket opened → work started</div></div>
@@ -283,9 +519,14 @@
 
   <!-- 5 Players -->
   <section class="tab" id="t-players">
-    <div class="card" style="margin-bottom:16px">
-      <div class="head" style="margin:0">
-        <div class="story"><p style="margin:0"><b>Carded play only</b> (≈66% of coin-in). Players' net = payout − coin-in. Who is "ahead" depends on the whole period, so this page uses fixed periods.</p></div>
+    <div class="flips-row">
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Carded play</span><span class="flip-sub">≈66% of coin-in</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>Carded play only</b> (≈66% of coin-in). Players' net = payout − coin-in. Who is "ahead" depends on the whole period, so this page uses fixed periods.</p></span>
+        </span>
+      </button>
+      <div class="card flip-filters">
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <label class="ctl">Period <select id="p-preset"></select></label>
           <label class="ctl">Tier <select id="p-tier"><option value="all">All</option></select></label>
@@ -298,7 +539,7 @@
       <div class="card kpi"><div class="label">Tracked players</div><div class="value" id="p-n">–</div></div>
       <div class="card kpi"><div class="label">Wagered</div><div class="value" id="p-ci">–</div></div>
       <div class="card kpi"><div class="label">Got back</div><div class="value" id="p-po">–</div></div>
-      <div class="card kpi feature"><div class="label">Players' net</div><div class="value" id="p-net">–</div></div>
+      <div class="card kpi feature lit"><div class="label">Players' net</div><div class="value" id="p-net">–</div></div>
       <div class="card kpi"><div class="label">Expected loss (theo)</div><div class="value" id="p-th">–</div></div>
       <div class="card kpi"><div class="label">Share ahead</div><div class="value" id="p-ahead">–</div></div>
     </div>
@@ -310,8 +551,13 @@
 
   <!-- 6 Comps -->
   <section class="tab" id="t-comps">
-    <div class="card story" style="margin-bottom:16px">
-      <p><b>What changed: on May 1 every comp's points price roughly halved</b> (a beer went from ≈114 to ≈53 points); menu value and cost per item did not change. Redemptions rose only ≈8% and comp cost went from 1.11% of tracked theo (Jan) to 1.32% (Jun) with no visible lift in play. Points are earned ≈20× faster than redeemed, so a cheaper price raises the value of the unredeemed balance. Comp cost is counted once (it is inside POS cost of goods).</p>
+    <div class="flips">
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">Points halved</span><span class="flip-sub">1 May 2025</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>On May 1 every comp's points price roughly halved</b> (a beer went from ≈114 to ≈53 points); menu value and cost per item did not change. Redemptions rose only ≈8% and comp cost went from 1.11% of tracked theo (Jan) to 1.32% (Jun) with no visible lift in play. Points are earned ≈20× faster than redeemed, so a cheaper price raises the value of the unredeemed balance. Comp cost is counted once (it is inside POS cost of goods).</p></span>
+        </span>
+      </button>
     </div>
     <div class="grid g2">
       <div class="card"><h2>Points price by comp item</h2><div class="chart" id="c-points"></div></div>
@@ -321,9 +567,19 @@
 
   <!-- 7 Model -->
   <section class="tab" id="t-model">
-    <div class="card story" style="margin-bottom:16px">
-      <p><b>Question:</b> how much will the floor wager on a given day? <b>Train</b> Jan 1 – Apr 30, <b>holdout</b> May 1 – Jun 30 (time split; both forecasts frozen before testing). <b>Baseline:</b> constant training-period daily mean. <b>Model:</b> training mean for that weekday. <b>Variant:</b> weekday mean of no-event days × average training-period event uplift, applied only to events announced in advance. No holdout actuals or later-published tourism data are inputs.</p>
-      <p><b>Decision it changes:</b> Fri–Sun run ≈30–60% above Tue–Wed and pre-announced events add ≈18% more, so technician coverage and the funded promotion weekend go on Fri–Sun — and the frozen forecast is the counterfactual for measuring the promotion's lift.</p>
+    <div class="grid g2 flips">
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">The forecast</span><span class="flip-sub">Train · holdout · baseline</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p><b>Question:</b> how much will the floor wager on a given day? <b>Train</b> Jan 1 – Apr 30, <b>holdout</b> May 1 – Jun 30 (time split; both forecasts frozen before testing). <b>Baseline:</b> constant training-period daily mean. <b>Model:</b> training mean for that weekday. <b>Variant:</b> weekday mean of no-event days × average training-period event uplift, applied only to events announced in advance. No holdout actuals or later-published tourism data are inputs.</p></span>
+        </span>
+      </button>
+      <button type="button" class="card flip" aria-expanded="false">
+        <span class="flip-inner">
+          <span class="flip-face flip-front"><span class="flip-hint">Click to flip</span><span class="flip-title">The decision</span><span class="flip-sub">Why the model matters</span></span>
+          <span class="flip-face flip-back"><span class="flip-hint">Click to flip back</span><p>Fri–Sun run ≈30–60% above Tue–Wed and pre-announced events add ≈18% more, so technician coverage and the funded promotion weekend go on Fri–Sun — and the frozen forecast is the counterfactual for measuring the promotion's lift.</p></span>
+        </span>
+      </button>
     </div>
     <div class="grid g3">
       <div class="card"><h2>Actual vs forecast daily coin-in</h2><p class="sub">Shaded: holdout.</p><div class="chart tall" id="c-forecast"></div></div>
@@ -337,13 +593,32 @@
       <h2>Claims & evidence</h2>
       <p class="sub">Every table is built by <code>databricks/02_build_gold.sql</code> in Databricks Free Edition and exported by <code>03_export_public.py</code>.</p>
       <div class="table-scroll" style="max-height:none"><table id="claims"></table></div>
-      <p class="src"><b>AI use:</b> an AI coding assistant (Cursor) helped write the SQL, the Databricks notebooks, this page and its visual styling, and draft text. All numbers come from the queries above and were re-run in Databricks.</p>
+      <p class="src"><b>AI use:</b> an AI coding assistant (Cursor) helped write the SQL, the Databricks notebooks, this page and its visual styling, and draft text. All numbers come from the queries above and were re-run in Databricks. The Ask button is not a remote model: it reads the tables already loaded in this page, and what you type is not sent anywhere.</p>
     </div>
   </section>
 
+  <div class="bulbs footer-bulbs" aria-hidden="true"></div>
   <footer>Dashboard Royale · TAMU Datathon · fictional casino, synthetic data · computed in Databricks Free Edition, served as a static export.</footer>
 </main>
 
+<button type="button" class="chat-open" id="chat-open" aria-expanded="false" aria-controls="chat">Ask the floor</button>
+<aside class="card chat" id="chat" hidden>
+  <div class="chat-h"><b>Floor desk</b><button type="button" class="chat-x" id="chat-x" aria-label="Close">×</button></div>
+  <p class="chat-note">Stays in this browser. Answers are recomputed from the tables already on this page, for the period and filters you've picked. Nothing you type is sent out, and the desk does not follow instructions to change that.</p>
+  <div class="chat-log" id="chat-log" aria-live="polite"></div>
+  <div class="chat-chips" id="chat-chips">
+    <button type="button">M-1158</button>
+    <button type="button">Bottom 10</button>
+    <button type="button">$100k plan</button>
+    <button type="button">The model</button>
+  </div>
+  <form class="chat-form" id="chat-form">
+    <input id="chat-q" maxlength="280" autocomplete="off" placeholder="Ask about a machine, the plan, or the model" aria-label="Question">
+    <button type="submit">Send</button>
+  </form>
+</aside>
+<script src="casino.js"></script>
 <script src="app.js"></script>
+<script src="chat.js"></script>
 </body>
 </html>

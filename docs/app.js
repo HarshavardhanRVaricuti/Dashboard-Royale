@@ -699,6 +699,7 @@ function init() {
   $("loading").remove();
   if (RENDER[hash]) document.querySelector(`#tabs button[data-t="${hash}"]`).click();
   else render();
+  if (window.startChat) window.startChat();
 }
 
 Promise.all(["data/machine_day.json", "data/players.json", "data/tables.json"].map(u => fetch(u).then(r => r.json())))
