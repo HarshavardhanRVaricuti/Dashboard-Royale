@@ -278,10 +278,12 @@ function renderMachines() {
   set("c-scatter", base({
     tooltip: { trigger: "item", formatter: p => `<b>${p.data.r.id}</b> ${esc(p.data.r.theme)}<br>${esc(p.data.r.zone)}<br>` +
       `Theo/hr $${fix(p.data.r.theo_hr)} · luck z ${fix(p.data.r.luck_z)} · hit z ${fix(p.data.r.hit_z, 1)}` },
-    xAxis: { type: "value", name: "Theo per available hour ($)", nameLocation: "middle", nameGap: 26, scale: true,
+    grid: { left: 58, right: 20, top: 40, bottom: 48 },
+    legend: { top: 4, left: 70, right: 12, textStyle: { color: css("--muted"), fontSize: 11 }, type: "scroll" },
+    xAxis: { type: "value", name: "Theo per available hour ($)", nameLocation: "middle", nameGap: 28, scale: true,
       axisLabel: { color: css("--muted") }, splitLine: { show: false } },
-    yAxis: { type: "value", name: "Luck z", axisLabel: { color: css("--muted") },
-      splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
+    yAxis: { type: "value", name: "Luck z", nameLocation: "middle", nameGap: 40, nameTextStyle: { color: css("--muted") },
+      axisLabel: { color: css("--muted") }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     series: Object.entries(byZone).map(([z, rs]) => ({
       name: z, type: "scatter", symbolSize: 9, itemStyle: { color: ZONE_COLORS[z], opacity: 0.85 },
       data: rs.map(r => ({ value: [r.theo_hr, r.luck_z], r, symbolSize: r.diagnosis[0] === "leak" ? 18 : 9,
