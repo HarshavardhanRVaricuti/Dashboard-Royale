@@ -35,4 +35,4 @@ Sensitivity: if inspection finds nothing on M-1158, the plan loses $6,000. If th
 
 ## AI-use disclosure
 
-An AI coding assistant (Cursor) helped write the DuckDB exploration scripts, the Databricks notebooks and Spark SQL, the dashboard definition, and drafts of this text. We re-ran every number in Databricks and checked each one against the queries named above.
+An AI coding assistant (Cursor) helped write the DuckDB exploration scripts, the Databricks notebooks and Spark SQL, the dashboard definition, and drafts of this text. It also helped restyle the public GitHub Pages dashboard (team colour theme, in-cell data bars, colour-coded z-scores and recommendation cards); those changes are visual only and do not alter any calculation. We re-ran every number in Databricks and checked each one against the queries named above.

@@ -1,5 +1,20 @@
 # Dashboard Royale
 
+## Our submission · Beta Dancers
+
+**Don't replace the bottom 10. Move the question.** Nine of the manager's bottom 10 sit in a weak zone, three were on the floor only part of the period, and most of the rest are within normal luck. One machine, M-1158, pays far more often than its published math and is worth inspecting. We spend $28.5k on three priced actions and keep $71.5k.
+
+| | |
+| --- | --- |
+| 📊 [Interactive dashboard](https://harshavardhanrvaricuti.github.io/Dashboard-Royale/) | Change the period, filter by zone or bank, trace each claim |
+| 📝 [Write-up](submission/WRITEUP.md) | Findings, model and priced plan (under 400 words) |
+| 🔎 [Claims & Evidence appendix](submission/CLAIMS_EVIDENCE.md) | Table → result → alternative tested → limitation; AI-use disclosure |
+| 🧱 [Databricks pipeline](databricks/README.md) | Load data, build gold tables, import the dashboard, export the public page |
+
+Everything below is the organisers' original challenge description.
+
+---
+
 ## Luck, Location, or a Leak?
 
 > Management is about to replace the ten machines that earned the least. Your dashboard could stop an expensive mistake-or show that management is right.

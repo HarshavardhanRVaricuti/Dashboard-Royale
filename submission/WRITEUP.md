@@ -2,7 +2,7 @@
 
 **1 · Weak machines.** We tested each machine for luck (house win − theo, scaled by its standard deviation), exposure (theo per available hour), and a leak (hit rate vs published math). Nine of the manager's bottom 10 sit in Back Forty, where every theme earns 41–55% less than the same theme at the Main Entrance. Three were on the floor only part of the period. Most of the rest fall within normal luck. One real lead: **M-1158** pays on 38.5% of spins vs 31.5% published, every month, and holds 3% vs 10% theo.
 
-**2 · Demand.** Saturday runs 64% above Tuesday. Sports weekends and the casino's slot tournament added 16–23%. When the entrance walkway to Back Forty closed (Mar 3–Apr 6), Back Forty theo fell 30% and then recovered. June softened with citywide visitation. New machines mostly pulled play from neighbours.
+**2 · Demand.** On days without events, Saturday runs 60% above Tuesday. Sports weekends and the casino's slot tournament added 16–23%. When the entrance walkway to Back Forty closed (Mar 3–Apr 6), Back Forty theo fell 30% and then recovered. June softened with citywide visitation. New machines mostly pulled play from neighbours.
 
 **3 · Downtime.** About 5,000 machine-hours, worth at most $90k theo. Ridgeline faults 2.4–3.6× as often as other makers, and May repair waits spiked when the day shift ran short of technicians.
 
