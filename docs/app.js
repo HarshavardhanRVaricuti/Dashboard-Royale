@@ -76,11 +76,36 @@ function diagnose(r, periodDays) {
   if (r.days < 0.8 * periodDays) return ["exp", "Exposure: on floor part of period"];
   if (r.availability < 0.97) return ["exp", "Downtime"];
   if (r.zone === "Back Forty" && r.luck_z > -2) return ["loc", "Location: weak zone, result within luck"];
-  if (r.luck_z < -2) return ["luck", "Unlucky (z < −2): re-test next period"];
+  if (r.luck_z < -2) return ["retest", "Unlucky (z < −2): re-test next period"];
   return ["luck", "Within luck"];
 }
 
 const pill = ([cls, text]) => `<span class="pill ${cls}">${esc(text)}</span>`;
+
+// In-cell data bar scaled to the column maximum; negative values draw in red.
+const dataBar = (v, max, text, cls = "") => {
+  const w = max > 0 && v != null ? Math.min(100, (Math.abs(v) / max) * 100) : 0;
+  return `<span class="bar-cell ${cls}"><span class="bar${v < 0 ? " neg" : ""}" style="width:${w.toFixed(1)}%"></span><span class="bar-v">${text}</span></span>`;
+};
+const colMax = (rows, ...keys) => Math.max(0, ...rows.flatMap(r => keys.map(k => Math.abs(r[k] ?? 0))));
+
+// Luck z: red when the house ran unlucky, green when lucky; shading deepens up to |z| = 3.
+const luckZ = z => {
+  if (z == null || isNaN(z)) return "–";
+  const flat = Math.abs(z) < 0.5;
+  const cls = flat ? "flat" : z < 0 ? "neg" : "pos";
+  const arrow = flat ? "" : `<i class="arr">${z < 0 ? "▼" : "▲"}</i>`;
+  return `<span class="z ${cls}" style="--a:${(0.1 + Math.min(Math.abs(z) / 3, 1) * 0.45).toFixed(2)}">${arrow}${fix(z)}</span>`;
+};
+
+// Hit z: neutral inside ±2, amber to ±4, red beyond (hit rate not behaving like its published math).
+const hitZ = z => {
+  if (z == null || isNaN(z)) return "–";
+  const a = Math.abs(z);
+  if (a > 4) return `<span class="z alert" title="Hit rate far from published math: inspect"><i class="arr">⚠</i>${fix(z, 1)}</span>`;
+  if (a > 2) return `<span class="z warn" title="Unusual hit rate"><i class="arr">${z < 0 ? "▼" : "▲"}</i>${fix(z, 1)}</span>`;
+  return `<span class="z flat">${fix(z, 1)}</span>`;
+};
 
 function rowsWhere(fn) {
   const R = MD.rows, out = [];
@@ -136,23 +161,32 @@ function renderDecision() {
   const spent = B.cost_usd.reduce((a, b) => a + b, 0);
   $("k-spent").textContent = "$" + int(spent);
   $("k-kept").textContent = "$" + int(100000 - spent);
+  $("rec-keepbar").style.width = (100000 - spent) / 1000 + "%";
 
   const list = machineAgg(S.s, S.e).sort((a, b) => a.manager_rank - b.manager_rank).slice(0, 10);
+  const winMax = colMax(list, "hw", "th"), hrMax = colMax(list, "theo_hr");
   $("bottom10").innerHTML = `<thead><tr><th>#</th><th>Machine</th><th>Zone</th><th class="num">Days</th>
     <th class="num">House win</th><th class="num">Theo</th><th class="num">Luck z</th><th class="num">Hit z</th>
-    <th class="num">Theo/hr</th><th>What's going on</th></tr></thead><tbody>` +
-    list.map(r => `<tr><td>${r.manager_rank}</td><td><b>${r.id}</b><br><span class="sub">${esc(r.theme)}</span></td>
-      <td>${esc(r.zone)}</td><td class="num">${r.days}</td><td class="num">${usd(r.hw)}</td><td class="num">${usd(r.th)}</td>
-      <td class="num">${fix(r.luck_z)}</td><td class="num">${fix(r.hit_z, 1)}</td><td class="num">$${fix(r.theo_hr)}</td>
+    <th class="num">Theo/hr</th><th class="insight">What's going on</th></tr></thead><tbody>` +
+    list.map(r => `<tr class="${r.diagnosis[0] === "leak" ? "leak" : ""}"><td>${r.manager_rank}</td><td><b>${r.id}</b><br><span class="sub">${esc(r.theme)}</span></td>
+      <td>${esc(r.zone)}</td><td class="num">${r.days}</td>
+      <td class="num">${dataBar(r.hw, winMax, usd(r.hw))}</td><td class="num">${dataBar(r.th, winMax, usd(r.th))}</td>
+      <td class="num">${luckZ(r.luck_z)}</td><td class="num">${hitZ(r.hit_z)}</td>
+      <td class="num">${dataBar(r.theo_hr, hrMax, "$" + fix(r.theo_hr))}</td>
       <td>${pill(r.diagnosis)}</td></tr>`).join("") + "</tbody>";
 
+  const costMax = Math.max(...B.cost_usd);
   $("budget").innerHTML = `<thead><tr><th>Action</th><th class="num">Qty</th><th>Targets</th><th class="num">Cost</th>
     <th class="num">Lead</th><th>Evidence</th><th>Expected effect</th><th>Uncertainty</th><th>How we'll know</th></tr></thead><tbody>` +
     B.action_type_id.map((a, i) => `<tr><td><b>${esc(B.name[i])}</b><br><span class="sub">${a}</span></td>
-      <td class="num">${B.quantity[i]}</td><td>${esc(B.targets[i])}</td><td class="num">$${int(B.cost_usd[i])}</td>
-      <td class="num">${B.lead_days[i]}d</td><td>${esc(B.evidence[i])}</td><td>${esc(B.expected_effect[i])}</td>
+      <td class="num">${B.quantity[i]}</td><td>${esc(B.targets[i])}</td>
+      <td class="num nowrap">${dataBar(B.cost_usd[i], costMax, "$" + int(B.cost_usd[i]))}<br><span class="sub">${pct(B.cost_usd[i] / 100000, 1)} of budget</span></td>
+      <td class="num" title="Days of the 30-day window before the action starts">${dataBar(B.lead_days[i], 30, B.lead_days[i] + "d", "sm")}</td>
+      <td>${esc(B.evidence[i])}</td><td>${esc(B.expected_effect[i])}</td>
       <td>${esc(B.uncertainty[i])}</td><td>${esc(B.measurement[i])}</td></tr>`).join("") + "</tbody>";
 }
+
+let SC_MAX = { win: 0, hr: 0 };
 
 const SCORE_COLS = [
   ["manager_rank", "Mgr rank", r => r.manager_rank, true],
@@ -162,16 +196,16 @@ const SCORE_COLS = [
   ["days", "Days", r => r.days, true],
   ["availability", "Avail.", r => pct(r.availability), true],
   ["occupancy", "Occup.", r => pct(r.occupancy), true],
-  ["hw", "House win", r => usd(r.hw), true],
-  ["th", "Theo", r => usd(r.th), true],
+  ["hw", "House win", r => dataBar(r.hw, SC_MAX.win, usd(r.hw)), true],
+  ["th", "Theo", r => dataBar(r.th, SC_MAX.win, usd(r.th)), true],
   ["luck", "Luck $", r => usd(r.luck), true],
-  ["luck_z", "Luck z", r => fix(r.luck_z), true],
+  ["luck_z", "Luck z", r => luckZ(r.luck_z), true],
   ["hold", "Hold", r => pct(r.hold), true],
   ["theo_hold", "Theo hold", r => pct(r.theo_hold), true],
   ["hit", "Hit rate", r => pct(r.hit), true],
   ["pub_hit", "Published hit", r => pct(r.pub_hit), true],
-  ["hit_z", "Hit z", r => fix(r.hit_z, 1), true],
-  ["theo_hr", "Theo / avail. hr", r => "$" + fix(r.theo_hr), true],
+  ["hit_z", "Hit z", r => hitZ(r.hit_z), true],
+  ["theo_hr", "Theo / avail. hr", r => dataBar(r.theo_hr, SC_MAX.hr, "$" + fix(r.theo_hr)), true],
 ];
 
 function renderMachines() {
@@ -184,9 +218,10 @@ function renderMachines() {
     const A = key === "diagnosis" ? a.diagnosis[1] : a[key], B = key === "diagnosis" ? b.diagnosis[1] : b[key];
     return (A > B ? 1 : A < B ? -1 : 0) * (S.asc ? 1 : -1);
   });
+  SC_MAX = { win: colMax(list, "hw", "th"), hr: colMax(list, "theo_hr") };
   $("scorecard").innerHTML = "<thead><tr>" + SCORE_COLS.map(([k, label, , isNum]) =>
     `<th data-k="${k}" class="${isNum ? "num" : ""}">${label}${k === S.sort ? (S.asc ? " ↑" : " ↓") : ""}</th>`).join("") +
-    "</tr></thead><tbody>" + list.map(r => `<tr class="click ${S.sel === r.m ? "on" : ""}" data-m="${r.m}">` +
+    "</tr></thead><tbody>" + list.map(r => `<tr class="click ${S.sel === r.m ? "on" : ""} ${r.diagnosis[0] === "leak" ? "leak" : ""}" data-m="${r.m}">` +
       SCORE_COLS.map(([, , fmt, isNum]) => `<td class="${isNum ? "num" : ""}">${fmt(r)}</td>`).join("") + "</tr>").join("") +
     (list.length ? "" : `<tr><td colspan="${SCORE_COLS.length}" class="sub">No machines match.</td></tr>`) + "</tbody>";
 
@@ -214,7 +249,7 @@ function renderMachines() {
     yAxis: { type: "category", data: themes, axisLabel: { color: css("--muted") } },
     visualMap: { min: Math.min(...vals), max: Math.max(...vals), orient: "horizontal", left: "center", bottom: 0,
       itemHeight: 160, text: ["high", "low"], textStyle: { color: css("--muted") },
-      inRange: { color: ["#a8432f", "#f4ecd9", "#234f3b"] } },
+      inRange: { color: [css("--red"), css("--card"), css("--green")] } },
     series: [{ type: "heatmap", data, label: { show: true, formatter: p => p.value[2].toFixed(1), fontSize: 10 } }],
   }));
 
@@ -231,7 +266,7 @@ function renderMachines() {
     series: Object.entries(byZone).map(([z, rs]) => ({
       name: z, type: "scatter", symbolSize: 9, itemStyle: { color: ZONE_COLORS[z], opacity: 0.85 },
       data: rs.map(r => ({ value: [r.theo_hr, r.luck_z], r, symbolSize: r.diagnosis[0] === "leak" ? 18 : 9,
-        itemStyle: r.diagnosis[0] === "leak" ? { borderColor: "#000", borderWidth: 2 } : undefined })),
+        itemStyle: r.diagnosis[0] === "leak" ? { color: css("--red"), borderColor: css("--ink"), borderWidth: 2, shadowBlur: 12, shadowColor: css("--red") } : undefined })),
       markLine: z === Object.keys(byZone)[0] ? { silent: true, symbol: "none", lineStyle: { color: css("--muted"), type: "dashed" },
         data: [{ yAxis: -2 }, { yAxis: 2 }], label: { formatter: "±2" } } : undefined,
     })),
@@ -291,7 +326,7 @@ function renderDemand() {
         (P.events_active[i] ? `<br>${esc(P.events_active[i])}` : ""); } },
     series: [{ name: "Coin-in", type: "line", data: idx.map(i => P.coin_in_usd[i]), showSymbol: false,
       lineStyle: { color: css("--green"), width: 1.8 }, itemStyle: { color: css("--green") },
-      markArea: { silent: true, itemStyle: { color: "rgba(184,151,90,.22)" }, label: { show: false },
+      markArea: { silent: true, itemStyle: { color: `rgba(${css("--accent-rgb")}, .14)` }, label: { show: false },
         data: eventAreas(dates, idx.map(i => P.events_active[i])) } }],
   }));
 
@@ -327,7 +362,7 @@ function renderDemand() {
       lineStyle: { color: ZONE_COLORS[z], width: S.zone === z || (S.zone === "all" && z === "Back Forty") ? 3.5 : 1.4,
         opacity: S.zone === "all" || S.zone === z ? 1 : 0.35 },
       itemStyle: { color: ZONE_COLORS[z] },
-      markArea: zi === 0 ? { silent: true, itemStyle: { color: "rgba(213,94,0,.10)" },
+      markArea: zi === 0 ? { silent: true, itemStyle: { color: `rgba(${css("--alert-rgb")}, .1)` },
         data: [[{ xAxis: wl.findIndex(w => w + 6 >= CLOSURE[0]) }, { xAxis: wl.findLastIndex(w => w <= CLOSURE[1]) }]] } : undefined,
     })),
   }));
@@ -523,7 +558,7 @@ function renderModel() {
     grid: { left: 64, right: 20, top: 36, bottom: 56 },
     series: [
       { name: "Actual", type: "line", data: F.actual, showSymbol: false, lineStyle: { color: css("--ink"), width: 2 }, itemStyle: { color: css("--ink") },
-        markArea: { silent: true, itemStyle: { color: "rgba(184,151,90,.18)" }, data: [[{ xAxis: F.gaming_date[test0], name: "Holdout" }, { xAxis: F.gaming_date[F.gaming_date.length - 1] }]],
+        markArea: { silent: true, itemStyle: { color: `rgba(${css("--accent-rgb")}, .12)` }, data: [[{ xAxis: F.gaming_date[test0], name: "Holdout" }, { xAxis: F.gaming_date[F.gaming_date.length - 1] }]],
           label: { color: css("--muted") } } },
       { name: "Weekday + event uplift", type: "line", data: F.pred_weekday_event, showSymbol: false, itemStyle: { color: "#009E73" }, lineStyle: { width: 1.6 } },
       { name: "Weekday mean (model)", type: "line", data: F.pred_weekday, showSymbol: false, itemStyle: { color: "#0072B2" }, lineStyle: { width: 1.4, type: "dashed" } },

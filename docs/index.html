@@ -9,14 +9,13 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
   :root {
-    --bg: #f3f3ee; --card: #fdfdf9; --ink: #1f3a2e; --muted: #6b7a72; --line: #e3e3da;
-    --green: #234f3b; --gold: #b8975a; --gold-soft: #f4ecd9; --track: #ecece4; --red: #a8432f;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #101814; --card: #17221c; --ink: #e9efe9; --muted: #9aa8a0; --line: #26332c;
-      --green: #3f8a66; --gold: #d2b072; --gold-soft: #3a3222; --track: #24302a; --red: #e07a62;
-    }
+    color-scheme: dark;
+    --bg: #120A1F; --card: #1E1433; --ink: #F5F3FF; --muted: #CFC6E6; --line: #33264F;
+    --accent-rgb: 139, 92, 246; --alert-rgb: 255, 77, 141;
+    --green: #8B5CF6; --on-accent: #FFFFFF; --gold: #FACC15; --gold-soft: #2A1D45; --track: #170F29; --red: #FF4D8D;
+    --bar: rgba(var(--accent-rgb), .32); --bar-neg: rgba(var(--alert-rgb), .3);
+    --neg-rgb: var(--alert-rgb); --neg-ink: #FFE0EC; --pos-rgb: var(--accent-rgb); --pos-ink: #EDE9FE;
+    --warn-bg: #4A3A10; --warn-ink: #FDE68A;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 Inter, system-ui, sans-serif; }
@@ -24,11 +23,15 @@
   header { background: var(--card); border-bottom: 1px solid var(--line); }
   header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 12px; font: 22px "DM Serif Display", serif; }
-  .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--green); color: var(--gold); display: grid; place-items: center; font-size: 19px; }
+  .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--green); color: var(--gold); display: grid; place-items: center; font-size: 19px; box-shadow: 0 0 14px rgba(var(--accent-rgb), .5); }
+  .logo { font: italic 24px/1 "DM Serif Display", serif; }
+  .team { font: 600 11px/1 Inter, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--gold);
+    padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(250, 204, 21, .45); background: rgba(250, 204, 21, .08); white-space: nowrap; }
   .tag { font-size: 12px; color: var(--muted); }
   .eyebrow { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
-  h1 { font: 40px/1.1 "DM Serif Display", serif; margin: 8px 0; }
-  h1 em { color: var(--green); }
+  h1 { font: 46px/1.08 "DM Serif Display", serif; margin: 8px 0 12px; color: var(--ink); }
+  h1 span { display: block; }
+  h1 .h1-lead { font-size: .62em; line-height: 1.25; }
   h2 { font-size: 17px; font-weight: 600; margin: 0; }
   h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; }
   .sub { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
@@ -42,7 +45,7 @@
   select option { background: var(--card); color: var(--ink); }
   .chips { display: flex; gap: 4px; background: var(--track); border-radius: 8px; padding: 3px; }
   .chips button, nav button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-  .chips button.on, nav button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .chips button.on, nav button.on { background: var(--green); color: var(--on-accent); font-weight: 600; box-shadow: 0 0 12px rgba(var(--accent-rgb), .45); }
   nav { display: flex; flex-wrap: wrap; gap: 4px; background: var(--track); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
   nav button { font-size: 13px; padding: 8px 12px; }
   .tab { display: none; }
@@ -56,8 +59,8 @@
   .kpi .label { color: var(--muted); font-size: 12px; }
   .kpi .value { font-size: 28px; margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
   .kpi .foot { color: var(--muted); font-size: 11px; }
-  .kpi.feature { background: var(--green); border-color: var(--green); color: #fff; }
-  .kpi.feature .label, .kpi.feature .foot { color: rgba(255,255,255,.78); }
+  .kpi.feature { background: linear-gradient(135deg, #8B5CF6, #6D28D9); border-color: var(--green); color: var(--on-accent); box-shadow: 0 6px 24px rgba(var(--accent-rgb), .35); }
+  .kpi.feature .label, .kpi.feature .foot { color: rgba(255,255,255,.82); }
   .chart { width: 100%; height: 320px; }
   .chart.tall { height: 420px; }
   .chart.short { height: 220px; }
@@ -74,10 +77,37 @@
   tbody tr.click { cursor: pointer; }
   tbody tr.click:hover, tbody tr.on { background: var(--track); }
   .pill { padding: 2px 8px; border-radius: 10px; font-size: 11px; white-space: nowrap; background: var(--gold-soft); }
-  .pill.leak { background: var(--red); color: #fff; }
-  .pill.loc { background: var(--gold); color: #1f1a10; }
-  .pill.exp { background: #6d87a8; color: #fff; }
-  .pill.luck { background: var(--track); color: var(--ink); }
+  .pill.leak { background: var(--red); color: #3B0A14; font-weight: 600; box-shadow: 0 0 10px rgba(var(--alert-rgb), .5); }
+  .pill.retest { background: transparent; color: var(--red); box-shadow: inset 0 0 0 1px var(--red); font-weight: 500; }
+  th.insight { color: var(--red); }
+  tbody tr.leak td { background: rgba(var(--alert-rgb), .08); }
+  tbody tr.leak td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+  .pill.loc { background: rgba(var(--accent-rgb), .2); color: #DDD6FE; }
+  .pill.exp { background: var(--gold-soft); color: var(--muted); }
+  .pill.luck { background: var(--track); color: var(--muted); }
+  .bar-cell { position: relative; display: inline-flex; justify-content: flex-end; min-width: 88px; padding: 2px 6px; }
+  .bar { position: absolute; left: 0; top: 1px; bottom: 1px; border-radius: 3px; background: var(--bar); }
+  .bar-cell.sm { min-width: 52px; }
+  .bar.neg { background: var(--bar-neg); }
+  td.nowrap { white-space: nowrap; }
+  .bar-v { position: relative; }
+  .z { display: inline-flex; justify-content: flex-end; align-items: center; gap: 4px; min-width: 60px; padding: 2px 6px; border-radius: 4px; }
+  .z .arr { font-style: normal; font-size: 9px; opacity: .85; }
+  .z.neg { background: rgba(var(--neg-rgb), var(--a)); color: var(--neg-ink); }
+  .z.pos { background: rgba(var(--pos-rgb), var(--a)); color: var(--pos-ink); }
+  .z.warn { background: var(--warn-bg); color: var(--warn-ink); font-weight: 500; }
+  .z.alert { background: var(--red); color: #fff; font-weight: 600; }
+  .z.alert .arr { font-size: 11px; opacity: 1; }
+  .recs { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+  .rec { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+  .rec .ico { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; color: #fff; }
+  .rec .ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .rec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 600; }
+  .rec-h .cost { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .rec p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .rec.keep { background: rgba(var(--accent-rgb), .1); border-color: rgba(var(--accent-rgb), .4); }
+  .keepbar { height: 6px; border-radius: 3px; background: var(--track); margin-top: 8px; overflow: hidden; }
+  .keepbar span { display: block; height: 100%; background: var(--green); }
   .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
   input[type=search] { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; height: 34px; padding: 0 10px; font: inherit; width: 200px; }
@@ -89,7 +119,7 @@
     .g2, .g3 { grid-template-columns: 1fr; }
     .g4, .g6 { grid-template-columns: 1fr 1fr; }
     .controls { position: static; }
-    h1 { font-size: 30px; }
+    h1 { font-size: 34px; }
     .tag { display: none; }
   }
 </style>
@@ -97,7 +127,7 @@
 <body>
 <header>
   <div class="wrap">
-    <div class="brand"><div class="logo">♠</div>The Gilded Ace · Floor analytics</div>
+    <div class="brand"><div class="logo" aria-hidden="true">β</div>The Gilded Ace · Floor analytics<span class="team">by Beta Dancers</span></div>
     <div class="tag">Dashboard Royale · built on Databricks Free Edition</div>
   </div>
 </header>
@@ -105,7 +135,7 @@
 <main class="wrap">
   <section class="hero">
     <div class="eyebrow">Luck, location, or a leak?</div>
-    <h1>Don't replace the bottom 10. <em>Move the question.</em></h1>
+    <h1><span class="h1-lead">Don't replace the bottom 10.</span><span>Move the question.</span></h1>
     <p class="sub">The manager's list mostly measures <b>where</b> machines sit, not <b>what</b> they are. One machine shows a real payout anomaly worth inspecting. Every number below is recomputed in your browser from the Databricks gold tables for the period you choose.</p>
     <div class="note">♦ The Gilded Ace is fictional and its data synthetic (TAMU Datathon <i>Dashboard Royale</i>). Only Las Vegas visitation (LVCVA) and Missouri slot benchmarks are real.</div>
   </section>
@@ -154,12 +184,32 @@
         <div class="table-scroll"><table id="bottom10"></table></div>
         <div class="src">Source: <code>g_machine_day</code> → luck z, hit z, exposure per machine · same logic as <code>g_machine_scorecard</code></div>
       </div>
-      <div class="card story">
+      <div class="card">
         <h2>What we'd do with $100k</h2>
-        <p><b>Inspect 5 machines ($6,000).</b> M-1158 pays on far more spins than its published math, every month. The other four are the most negative luck results; inspection rules them in or out.</p>
-        <p><b>One promotion weekend ($15,000).</b> The February slot tournament added +18% coin-in (≈$80k theo) with no dip afterwards.</p>
-        <p><b>Wayfinding for Back Forty ($7,500).</b> The zone is weak for every theme and fell 30% when its walkway closed: access is the problem.</p>
-        <p><b>Keep $71,500.</b> Replacing machines in Back Forty didn't help (M-1120 → M-5076: $6.00 → $6.39 theo/hr). Extra technicians would recover only $1–4k.</p>
+        <p class="sub">Three actions, 30 days from Jul 1. Most of the budget stays put.</p>
+        <ul class="recs">
+          <li class="rec">
+            <span class="ico" style="background:var(--red)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <div><div class="rec-h">Inspect 5 machines <span class="cost">$6,000</span></div>
+              <p>M-1158 pays on far more spins than its published math, every month. The other four are the most negative luck results; inspection rules them in or out.</p></div>
+          </li>
+          <li class="rec">
+            <span class="ico" style="background:var(--gold);color:#1E1433"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3v1a3 3 0 0 1-3 3M7 6H4v1a3 3 0 0 0 3 3"/></svg></span>
+            <div><div class="rec-h">One promotion weekend <span class="cost">$15,000</span></div>
+              <p>The February slot tournament added +18% coin-in (≈$80k theo) with no dip afterwards.</p></div>
+          </li>
+          <li class="rec">
+            <span class="ico" style="background:#6d87a8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M9 21h6"/><path d="M12 5h6l2.5 2.5L18 10h-6M12 12H6l-2.5 2.5L6 17h6"/></svg></span>
+            <div><div class="rec-h">Wayfinding for Back Forty <span class="cost">$7,500</span></div>
+              <p>Weak for every theme and down 30% while its walkway was closed: access is the problem.</p></div>
+          </li>
+          <li class="rec keep">
+            <span class="ico" style="background:var(--green);color:var(--on-accent)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <div><div class="rec-h">Keep $71,500 <span class="cost">71.5%</span></div>
+              <p>Replacing Back Forty machines didn't help (M-1120 → M-5076: $6.00 → $6.39 theo/hr). Extra technicians would recover only $1–4k.</p>
+              <div class="keepbar" aria-hidden="true"><span id="rec-keepbar"></span></div></div>
+          </li>
+        </ul>
       </div>
     </div>
     <div class="card">
