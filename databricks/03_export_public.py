@@ -134,7 +134,7 @@ small = {
                contribution_usd, comp_cost_usd, faults_opened
         FROM {t('g_property_day')} ORDER BY gaming_date"""),
     "faults": columns(f"""
-        SELECT DATEDIFF(gaming_date, DATE'2025-01-01') AS d, shift, manufacturer, zone_name,
+        SELECT DATEDIFF(gaming_date, DATE'2025-01-01') AS d, shift, manufacturer, zone_name, bank_id AS bank,
                ROUND(wait_hours, 3) AS wait, ROUND(fix_hours, 3) AS fix, ROUND(down_hours, 3) AS down
         FROM {t('g_fault_tickets')} WHERE event_type = 'fault_repair'"""),
     "staff": columns(f"""

@@ -33,6 +33,7 @@ const SHIFT_COLORS = { day: "#E69F00", swing: "#0072B2", grave: "#555F6B" };
 
 const S = { s: 0, e: 180, zone: "all", bank: "all", tab: "decision", sort: "manager_rank", asc: true, q: "", sel: null };
 let MD, PL, TB;
+const BANK_ZONE = {};
 const charts = {};
 
 // ---------------------------------------------------------------- aggregation
@@ -115,6 +116,22 @@ function rowsWhere(fn) {
 
 const zoneOk = z => S.zone === "all" || MD.zones[z] === S.zone;
 const bankOk = b => S.bank === "all" || MD.banks[b] === S.bank;
+const inScope = r => (S.zone === "all" || r.zone === S.zone) && (S.bank === "all" || r.bank === S.bank);
+const scoped = () => S.zone !== "all" || S.bank !== "all";
+const scopeName = () => [S.zone, S.bank].filter(v => v !== "all").join(" · ");
+
+// Daily coin-in, house win and theo for the selected zone/bank, rebuilt from machine-day rows.
+function scopedDays() {
+  const R = MD.rows, out = new Map();
+  for (let i = 0; i < R.d.length; i++) {
+    const d = R.d[i];
+    if (d < S.s || d > S.e || !zoneOk(R.z[i]) || !bankOk(R.b[i])) continue;
+    if (!out.has(d)) out.set(d, { ci: 0, hw: 0, th: 0 });
+    const a = out.get(d);
+    a.ci += R.ci[i]; a.hw += R.hw[i]; a.th += R.th[i];
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------- charts
 
@@ -147,7 +164,9 @@ function set(id, opt) {
 function renderDecision() {
   const P = TB.property_day;
   let hw = 0, th = 0, ci = 0, n = 0;
-  P.gaming_date.forEach((g, i) => {
+  if (scoped()) {
+    scopedDays().forEach(a => { hw += a.hw; th += a.th; ci += a.ci; n++; });
+  } else P.gaming_date.forEach((g, i) => {
     const d = dnum(g);
     if (d < S.s || d > S.e) return;
     hw += P.house_win_usd[i]; th += P.theo_usd[i]; ci += P.coin_in_usd[i]; n++;
@@ -168,7 +187,7 @@ function renderDecision() {
   $("bottom10").innerHTML = `<thead><tr><th>#</th><th>Machine</th><th>Zone</th><th class="num">Days</th>
     <th class="num">House win</th><th class="num">Theo</th><th class="num">Luck z</th><th class="num">Hit z</th>
     <th class="num">Theo/hr</th><th class="insight">What's going on</th></tr></thead><tbody>` +
-    list.map(r => `<tr class="${r.diagnosis[0] === "leak" ? "leak" : ""}"><td>${r.manager_rank}</td><td><b>${r.id}</b><br><span class="sub">${esc(r.theme)}</span></td>
+    list.map(r => `<tr class="${r.diagnosis[0] === "leak" ? "leak" : ""} ${inScope(r) ? "" : "dim"}"><td>${r.manager_rank}</td><td><b>${r.id}</b><br><span class="sub">${esc(r.theme)}</span></td>
       <td>${esc(r.zone)}</td><td class="num">${r.days}</td>
       <td class="num">${dataBar(r.hw, winMax, usd(r.hw))}</td><td class="num">${dataBar(r.th, winMax, usd(r.th))}</td>
       <td class="num">${luckZ(r.luck_z)}</td><td class="num">${hitZ(r.hit_z)}</td>
@@ -211,7 +230,7 @@ const SCORE_COLS = [
 function renderMachines() {
   const all = machineAgg(S.s, S.e);
   const list = all
-    .filter(r => (S.zone === "all" || r.zone === S.zone) && (S.bank === "all" || r.bank === S.bank))
+    .filter(inScope)
     .filter(r => !S.q || (r.id + " " + r.theme).toLowerCase().includes(S.q));
   const key = S.sort;
   list.sort((a, b) => {
@@ -318,20 +337,22 @@ function renderDemand() {
   const P = TB.property_day;
   const idx = P.gaming_date.map((g, i) => i).filter(i => { const d = dnum(P.gaming_date[i]); return d >= S.s && d <= S.e; });
   const dates = idx.map(i => P.gaming_date[i]);
+  const sd = scoped() ? scopedDays() : null;
+  const coinIn = i => (sd ? sd.get(dnum(P.gaming_date[i]))?.ci ?? null : P.coin_in_usd[i]);
   set("c-daily", base({
     xAxis: { type: "category", data: dates, axisLabel: { color: css("--muted"), formatter: v => v.slice(5) } },
     yAxis: { type: "value", ...usdAxis, scale: true, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", formatter: ps => { const i = idx[ps[0].dataIndex];
-      return `<b>${P.gaming_date[i]}</b> ${P.local_weekday[i]}<br>Coin-in ${usd(P.coin_in_usd[i])}` +
+      return `<b>${P.gaming_date[i]}</b> ${P.local_weekday[i]}<br>Coin-in ${usd(coinIn(i))}` +
         (P.events_active[i] ? `<br>${esc(P.events_active[i])}` : ""); } },
-    series: [{ name: "Coin-in", type: "line", data: idx.map(i => P.coin_in_usd[i]), showSymbol: false,
+    series: [{ name: "Coin-in", type: "line", data: idx.map(coinIn), showSymbol: false,
       lineStyle: { color: css("--green"), width: 1.8 }, itemStyle: { color: css("--green") },
       markArea: { silent: true, itemStyle: { color: `rgba(${css("--accent-rgb")}, .14)` }, label: { show: false },
         data: eventAreas(dates, idx.map(i => P.events_active[i])) } }],
   }));
 
   const order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wk = {};
-  idx.forEach(i => { if (P.events_active[i]) return; const w = (wk[P.local_weekday[i]] = wk[P.local_weekday[i]] || [0, 0]); w[0] += P.coin_in_usd[i]; w[1]++; });
+  idx.forEach(i => { if (P.events_active[i] || coinIn(i) == null) return; const w = (wk[P.local_weekday[i]] = wk[P.local_weekday[i]] || [0, 0]); w[0] += coinIn(i); w[1]++; });
   set("c-weekday", base({
     xAxis: { type: "category", data: order, axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", ...usdAxis, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
@@ -424,12 +445,13 @@ function renderDowntime() {
     mdays[mf] = (mdays[mf] || 0) + 1;
   });
   const F = TB.faults;
-  const fi = F.d.map((d, i) => i).filter(i => F.d[i] >= S.s && F.d[i] <= S.e && (S.zone === "all" || F.zone_name[i] === S.zone));
+  const fi = F.d.map((d, i) => i).filter(i => F.d[i] >= S.s && F.d[i] <= S.e &&
+    (S.zone === "all" || F.zone_name[i] === S.zone) && (S.bank === "all" || F.bank[i] === S.bank));
   $("k-down").textContent = int(down) + " h";
   $("k-down-f").textContent = `${pct(down / sch, 2)} of scheduled machine-hours`;
   $("k-lost").textContent = usd(lost);
   $("k-faults").textContent = int(fi.length);
-  $("k-faults-f").textContent = S.zone === "all" ? "fault_repair tickets" : `in ${S.zone}`;
+  $("k-faults-f").textContent = scoped() ? `in ${scopeName()}` : "fault_repair tickets";
   $("k-wait").textContent = fi.length ? fix(fi.reduce((s, i) => s + F.wait[i], 0) / fi.length) + " h" : "–";
 
   const ms = MONTHS.filter(k => dnum(k + "-01") <= S.e && dnum(k + "-01") + 31 > S.s);
@@ -598,7 +620,34 @@ const RENDER = {
   players: renderPlayers, comps: renderComps, model: renderModel, evidence: renderEvidence,
 };
 
+const SCOPE_NOTES = {
+  decision: "House win and hold follow the filter. The bottom 10 stays the manager's floor-wide list, with machines outside the selection faded; the $100k plan is floor-wide.",
+  machines: "The scorecard and scatter follow the filter. The heatmap always compares every zone.",
+  demand: "Daily and weekday coin-in follow the filter, and the weekly chart highlights the zone. Event lift, Las Vegas visitors and the new-machine test are floor-wide.",
+  downtime: "Downtime, lost theo, faults and wait times follow the filter. Technician staffing is floor-wide.",
+  players: "Zone and bank don't apply here: carded players move around the whole floor. Use the Tier, Region and Age filters below.",
+  comps: "Zone and bank don't apply here: comps are a floor-wide program.",
+  model: "Zone and bank don't apply here: the forecast is for total floor coin-in.",
+  evidence: "Zone and bank don't apply on this page.",
+};
+
+function renderScope() {
+  const on = scoped();
+  document.querySelectorAll("[data-scope]").forEach(el => (el.textContent = on ? " · " + scopeName() : ""));
+  $("scope-note").hidden = !on;
+  if (on) $("scope-note").innerHTML = `<b>Filtered to ${esc(scopeName())}.</b> ${SCOPE_NOTES[S.tab]}`;
+}
+
+function fillBanks() {
+  const sel = $("bank");
+  sel.length = 1;
+  MD.banks.forEach(b => { if (S.zone === "all" || BANK_ZONE[b] === S.zone) sel.add(new Option(b, b)); });
+  if (![...sel.options].some(o => o.value === S.bank)) S.bank = "all";
+  sel.value = S.bank;
+}
+
 function render() {
+  renderScope();
   RENDER[S.tab]();
   requestAnimationFrame(() => Object.values(charts).forEach(c => c.getDom().offsetParent && c.resize()));
 }
@@ -616,7 +665,8 @@ function setPeriod(s, e) {
 
 function init() {
   MD.zones.forEach(z => $("zone").add(new Option(z, z)));
-  MD.banks.forEach(b => $("bank").add(new Option(b, b)));
+  MD.rows.b.forEach((b, i) => (BANK_ZONE[MD.banks[b]] = MD.zones[MD.rows.z[i]]));
+  fillBanks();
   PL.presets.forEach(p => $("p-preset").add(new Option(p.label, p.key)));
   [["p-tier", "tier"], ["p-region", "region"], ["p-age", "age"]].forEach(([id, k]) =>
     [...new Set(PL.rows[k])].sort().forEach(v => $(id).add(new Option(v, v))));
@@ -624,7 +674,7 @@ function init() {
   $("start").onchange = () => setPeriod($("start").value, $("end").value);
   $("end").onchange = () => setPeriod($("start").value, $("end").value);
   $("presets").onclick = e => { const b = e.target.closest("button"); if (b) setPeriod(b.dataset.s, b.dataset.e); };
-  $("zone").onchange = e => { S.zone = e.target.value; render(); };
+  $("zone").onchange = e => { S.zone = e.target.value; fillBanks(); render(); };
   $("bank").onchange = e => { S.bank = e.target.value; render(); };
   ["p-preset", "p-tier", "p-region", "p-age"].forEach(id => ($(id).onchange = renderPlayers));
   $("tabs").onclick = e => {

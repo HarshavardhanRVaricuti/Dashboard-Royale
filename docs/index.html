@@ -48,6 +48,11 @@
   .chips button.on, nav button.on { background: var(--green); color: var(--on-accent); font-weight: 600; box-shadow: 0 0 12px rgba(var(--accent-rgb), .45); }
   nav { display: flex; flex-wrap: wrap; gap: 4px; background: var(--track); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
   nav button { font-size: 13px; padding: 8px 12px; }
+  .scope-note { margin: -6px 0 16px; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; color: var(--muted);
+    background: rgba(var(--accent-rgb), .1); box-shadow: inset 3px 0 0 var(--green); }
+  .scope-note b { color: var(--ink); }
+  .scope-tag { color: var(--gold); font-weight: 500; }
+  tbody tr.dim td { opacity: .38; }
   .tab { display: none; }
   .tab.on { display: block; }
   .grid { display: grid; gap: 16px; margin-bottom: 16px; }
@@ -167,14 +172,15 @@
     <button data-t="model">7 · Model</button>
     <button data-t="evidence">8 · Evidence</button>
   </nav>
+  <div id="scope-note" class="scope-note" role="status" hidden></div>
 
   <div id="loading" class="loading">Loading data…</div>
 
   <!-- 1 Decision -->
   <section class="tab on" id="t-decision">
     <div class="grid g4">
-      <div class="card kpi feature"><div class="label">House win (period)</div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
-      <div class="card kpi"><div class="label">Observed hold vs theo hold</div><div class="value" id="k-hold">–</div><div class="foot" id="k-hold-f">–</div></div>
+      <div class="card kpi feature"><div class="label">House win (period)<span class="scope-tag" data-scope></span></div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
+      <div class="card kpi"><div class="label">Observed hold vs theo hold<span class="scope-tag" data-scope></span></div><div class="value" id="k-hold">–</div><div class="foot" id="k-hold-f">–</div></div>
       <div class="card kpi"><div class="label">Budget spent</div><div class="value" id="k-spent">–</div><div class="foot">3 action types, 30 days from Jul 1</div></div>
       <div class="card kpi"><div class="label">Budget kept</div><div class="value" id="k-kept">–</div><div class="foot">Of $100,000</div></div>
     </div>
@@ -244,8 +250,8 @@
       <p><b>Three drivers.</b> Weekday rhythm (Saturday ≈ +60% vs Tuesday) · events (sports weekends and the casino's slot tournament +16–23%, conventions little) · access: the Main Entrance → Back Forty walkway closed for renovation Mar 3 – Apr 6 and Back Forty theo fell ≈30%, then recovered. June softened with Las Vegas visitation.</p>
     </div>
     <div class="grid g3">
-      <div class="card"><h2>Daily floor coin-in</h2><p class="sub">Shaded days had an event.</p><div class="chart" id="c-daily"></div></div>
-      <div class="card"><h2>Average coin-in by weekday</h2><p class="sub">No-event days in the period.</p><div class="chart" id="c-weekday"></div></div>
+      <div class="card"><h2>Daily coin-in<span class="scope-tag" data-scope></span></h2><p class="sub">Shaded days had an event.</p><div class="chart" id="c-daily"></div></div>
+      <div class="card"><h2>Average coin-in by weekday<span class="scope-tag" data-scope></span></h2><p class="sub">No-event days in the period.</p><div class="chart" id="c-weekday"></div></div>
     </div>
     <div class="grid g3">
       <div class="card"><h2>Theo per day by zone, weekly</h2><p class="sub">Shaded: walkway closed. Pick a zone above to highlight it.</p><div class="chart" id="c-zoneweek"></div></div>

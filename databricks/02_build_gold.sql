@@ -239,6 +239,7 @@ SELECT
   o.machine_id,
   m.manufacturer,
   z.zone_name,
+  fl.bank_id,
   o.event_type,
   CAST(o.opened_at_local - INTERVAL 6 HOURS AS DATE) AS gaming_date,
   HOUR(o.opened_at_local) AS opened_local_hour,
@@ -254,7 +255,8 @@ SELECT
 FROM operations o
 JOIN machines m USING (machine_id)
 LEFT JOIN (SELECT DISTINCT location_id, zone_name FROM prepared_daily_view WHERE location_id IS NOT NULL) z
-  ON z.location_id = o.location_id;
+  ON z.location_id = o.location_id
+LEFT JOIN floor_locations fl ON fl.location_id = o.location_id;
 
 -- COMMAND ----------
 
