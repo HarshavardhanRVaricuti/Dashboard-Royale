@@ -3,435 +3,290 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Gilded Ace · Slot floor review</title>
+<title>The Gilded Ace · Luck, location, or a leak?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
-  /* Texas A&M: Aggie Maroon (#500000) is the only accent, on warm neutral grays. */
   :root {
-    --maroon: #500000;
-    --bg: #f5f5f4; --card: #ffffff; --subtle: #f8f8f7; --line: #e4e2de; --line-strong: #d0cdc7;
-    --ink: #1f1c1a; --ink-2: #45403c; --muted: #707373;
-    --accent: #500000; --accent-soft: #f4eaea; --bad: #500000;
-    --g1: #3e3e3e; --g2: #707373; --g3: #a7a7a7; --g4: #d6d3c4;
-    --heat-lo: #f5f4f1; --heat-m1: #e0c7c7; --heat-m2: #9a4d4d; --heat-hi: #500000; --heat-ink-hi: #ffffff;
-    --c-maroon: #500000; --c-blue: #2c6fbb; --c-green: #2e8b57; --c-orange: #d9822b;
-    --c-purple: #7b5ea7; --c-gold: #c9a227; --c-teal: #1f9e9e; --c-gray: #9aa0a6;
+    --bg: #f3f3ee; --card: #fdfdf9; --ink: #1f3a2e; --muted: #6b7a72; --line: #e3e3da;
+    --green: #234f3b; --gold: #b8975a; --gold-soft: #f4ecd9; --track: #ecece4; --red: #a8432f;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #141212; --card: #1c1a19; --subtle: #221f1e; --line: #322e2c; --line-strong: #433e3b;
-      --ink: #ece9e6; --ink-2: #c9c4bf; --muted: #a09a95;
-      --accent: #c98b8b; --accent-soft: #3a2424; --bad: #d99a9a;
-      --g1: #d6d3c4; --g2: #a7a7a7; --g3: #707373; --g4: #4a4746;
-      --heat-lo: #221f1e; --heat-m1: #4a2c2c; --heat-m2: #8a4a4a; --heat-hi: #c98b8b; --heat-ink-hi: #141212;
-      --c-maroon: #d46a6a; --c-blue: #6aa5e6; --c-green: #5fc28d; --c-orange: #f0a35a;
-      --c-purple: #a98bd6; --c-gold: #e2c45a; --c-teal: #4cc7c7; --c-gray: #8a9096;
+      --bg: #101814; --card: #17221c; --ink: #e9efe9; --muted: #9aa8a0; --line: #26332c;
+      --green: #3f8a66; --gold: #d2b072; --gold-soft: #3a3222; --track: #24302a; --red: #e07a62;
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 13.5px/1.5 Inter, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
-  code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--subtle); border: 1px solid var(--line); padding: 0 4px; border-radius: 3px; }
-  a { color: var(--accent); }
-
-  /* ---------- shell */
-  .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
-  .side { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--card); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
-  .brand { padding: 16px 18px; background: var(--maroon); color: #fff; }
-  .brand b { display: block; font-size: 14px; font-weight: 600; }
-  .brand span { color: rgba(255,255,255,.75); font-size: 12px; }
-  .side-sec { padding: 14px 10px 6px; }
-  .side-label { padding: 0 8px 6px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  nav { display: flex; flex-direction: column; gap: 1px; }
-  nav button { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; width: 100%; text-align: left; border: 0; border-left: 2px solid transparent;
-    background: transparent; color: var(--ink-2); font: inherit; padding: 7px 8px; border-radius: 0 4px 4px 0; cursor: pointer; }
-  nav button:hover { background: var(--subtle); }
-  nav button .n { font: 11px ui-monospace, Menlo, monospace; color: var(--muted); padding-top: 2px; }
-  nav button b { display: block; font-weight: 500; font-size: 13px; color: var(--ink); }
-  nav button small { color: var(--muted); font-size: 11.5px; }
-  nav button.on { background: var(--accent-soft); border-left-color: var(--accent); }
-  nav button.on b, nav button.on .n { color: var(--accent); }
-  .guide { display: flex; flex-direction: column; }
-  .guide button { text-align: left; border: 0; background: transparent; font: inherit; color: var(--ink-2); padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 12.5px; }
-  .guide button:hover { background: var(--subtle); color: var(--ink); }
-  .guide button span { color: var(--muted); }
-  details.gloss { margin: 4px 8px 0; font-size: 12.5px; }
-  details.gloss summary { cursor: pointer; color: var(--ink-2); padding: 4px 0; }
-  details.gloss dl { margin: 6px 0 0; }
-  details.gloss dt { font-weight: 600; margin-top: 8px; }
-  details.gloss dd { margin: 2px 0 0; color: var(--muted); }
-  .side-foot { margin-top: auto; padding: 14px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; }
-
-  .main { min-width: 0; }
-  .topbar { position: sticky; top: 0; z-index: 5; background: var(--card); border-bottom: 1px solid var(--line); }
-  .titlebar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 14px 24px 10px; }
-  .kicker { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  h1 { font-size: 18px; font-weight: 600; margin: 2px 0 0; letter-spacing: -.005em; }
-  .meta { color: var(--muted); font-size: 12px; text-align: right; white-space: nowrap; }
-  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 24px 10px; }
-  .ctl { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--card); color: var(--muted); font-size: 12.5px; }
-  .ctl.off, .chips.off { opacity: .45; }
-  select, input[type=date] { border: 0; background: transparent; color: var(--ink); font: inherit; padding: 2px 0; cursor: pointer; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 Inter, system-ui, sans-serif; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+  header { background: var(--card); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 12px; font: 22px "DM Serif Display", serif; }
+  .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--green); color: var(--gold); display: grid; place-items: center; font-size: 19px; }
+  .tag { font-size: 12px; color: var(--muted); }
+  .eyebrow { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  h1 { font: 40px/1.1 "DM Serif Display", serif; margin: 8px 0; }
+  h1 em { color: var(--green); }
+  h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
+  .hero { padding: 28px 0 12px; }
+  .hero p { max-width: 900px; }
+  .note { background: var(--gold-soft); border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-top: 10px; display: inline-block; }
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+  .controls .wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ctl { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; height: 38px; color: var(--muted); font-size: 13px; }
+  select, input[type=date] { border: 0; background: transparent; color: var(--ink); font: inherit; padding: 4px 0; cursor: pointer; }
   select option { background: var(--card); color: var(--ink); }
-  .chips { display: flex; height: 32px; border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; }
-  .chips button { border: 0; border-left: 1px solid var(--line-strong); background: var(--card); color: var(--ink-2); font: inherit; font-size: 12.5px; padding: 0 10px; cursor: pointer; }
-  .chips button:first-child { border-left: 0; }
-  .chips button.on { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
-  .reset { height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--card); color: var(--ink-2); font: inherit; font-size: 12.5px; cursor: pointer; }
-  .reset:hover, .chips button:hover { background: var(--subtle); }
-  .scope { padding: 7px 24px; border-top: 1px solid var(--line); background: var(--subtle); color: var(--muted); font-size: 12px; }
-  .scope b { color: var(--ink-2); font-weight: 600; }
-
-  .content { padding: 20px 24px 8px; max-width: 1360px; }
+  .chips { display: flex; gap: 4px; background: var(--track); border-radius: 8px; padding: 3px; }
+  .chips button, nav button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+  .chips button.on, nav button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  nav { display: flex; flex-wrap: wrap; gap: 4px; background: var(--track); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
+  nav button { font-size: 13px; padding: 8px 12px; }
   .tab { display: none; }
   .tab.on { display: block; }
-
-  /* ---------- building blocks */
   .grid { display: grid; gap: 16px; margin-bottom: 16px; }
   .g2 { grid-template-columns: 1fr 1fr; }
   .g3 { grid-template-columns: 2fr 1fr; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; min-width: 0; }
-  h2 { font-size: 13.5px; font-weight: 600; margin: 0; }
-  h3 { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: 12.5px; margin: 2px 0 0; }
-  .card > .sub { margin-bottom: 8px; }
-
-  .answer { display: grid; grid-template-columns: 150px 1fr; gap: 4px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; margin-bottom: 16px; }
-  .answer .q { grid-column: 1 / -1; font-size: 12px; color: var(--muted); padding-bottom: 8px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
-  .answer .a { grid-column: 2; margin: 0; font-size: 14.5px; font-weight: 600; line-height: 1.45; }
-  .answer .how { grid-column: 2; margin: 0; color: var(--ink-2); font-size: 12.5px; }
-  .answer .how b { font-weight: 600; }
-  .answer .lbl { grid-column: 1; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
-
-  .kpis { display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 6px; margin-bottom: 16px; }
-  .k4 { grid-template-columns: repeat(4, 1fr); }
-  .k6 { grid-template-columns: repeat(6, 1fr); }
-  .kpi { padding: 14px 18px; border-left: 1px solid var(--line); min-width: 0; }
-  .kpi:first-child { border-left: 0; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g6 { grid-template-columns: repeat(6, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; min-width: 0; }
   .kpi .label { color: var(--muted); font-size: 12px; }
-  .kpi .value { font-size: 22px; font-weight: 600; margin: 4px 0 2px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-  .kpi .foot { color: var(--muted); font-size: 11.5px; }
-  .kpi.primary .value { color: var(--accent); }
-
+  .kpi .value { font-size: 28px; margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+  .kpi .foot { color: var(--muted); font-size: 11px; }
+  .kpi.feature { background: var(--green); border-color: var(--green); color: #fff; }
+  .kpi.feature .label, .kpi.feature .foot { color: rgba(255,255,255,.78); }
   .chart { width: 100%; height: 320px; }
   .chart.tall { height: 420px; }
   .chart.short { height: 220px; }
-  .story p { margin: 8px 0 0; color: var(--ink-2); }
-  .story b { color: var(--ink); font-weight: 600; }
-  .src { color: var(--muted); font-size: 11.5px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
-
+  .story { font-size: 14px; }
+  .story p { margin: 0 0 8px; }
+  .story b { color: var(--green); }
+  .src { color: var(--muted); font-size: 11px; margin-top: 8px; }
+  .src code { background: var(--track); padding: 1px 5px; border-radius: 4px; }
   table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { position: sticky; top: 0; background: var(--subtle); text-align: left; font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted);
-    padding: 8px 10px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; z-index: 1; }
+  th { text-align: left; font-weight: 500; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   th[data-k] { cursor: pointer; }
-  th[data-k]:hover { color: var(--ink); }
-  th[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
-  th[data-k][title] { cursor: pointer; }
-  td { padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: top; color: var(--ink-2); }
-  td b { color: var(--ink); font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: top; }
   td.num, th.num { text-align: right; }
-  tbody tr:hover { background: var(--subtle); }
   tbody tr.click { cursor: pointer; }
-  tbody tr.on { background: var(--accent-soft); }
-  .table-scroll { overflow: auto; max-height: 560px; border: 1px solid var(--line); border-radius: 4px; }
+  tbody tr.click:hover, tbody tr.on { background: var(--track); }
+  .pill { padding: 2px 8px; border-radius: 10px; font-size: 11px; white-space: nowrap; background: var(--gold-soft); }
+  .pill.leak { background: var(--red); color: #fff; }
+  .pill.loc { background: var(--gold); color: #1f1a10; }
+  .pill.exp { background: #6d87a8; color: #fff; }
+  .pill.luck { background: var(--track); color: var(--ink); }
+  .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-  input[type=search] { border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); border-radius: 4px; height: 32px; padding: 0 10px; font: inherit; width: 220px; }
-
-  .pill { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 11.5px; white-space: nowrap; border: 1px solid var(--line-strong); color: var(--ink-2); background: var(--card); }
-  .pill.leak { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 600; }
-  .pill.loc { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); font-weight: 500; }
-  .pill.exp { background: var(--subtle); }
-  .pill.luck { border-style: dashed; color: var(--muted); }
-  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; margin-top: 12px; font-size: 12px; color: var(--muted); }
-  .detail { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--subtle); display: none; }
+  input[type=search] { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; height: 34px; padding: 0 10px; font: inherit; width: 200px; }
+  .detail { margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: var(--gold-soft); display: none; }
   .detail.show { display: block; }
-  footer { color: var(--muted); font-size: 11.5px; padding: 8px 0 32px; }
+  footer { color: var(--muted); font-size: 12px; padding: 24px 0 40px; }
   .loading { padding: 60px 0; text-align: center; color: var(--muted); }
-
-  @media (max-width: 1100px) {
-    .app { grid-template-columns: 1fr; }
-    .side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
-    nav { flex-direction: row; flex-wrap: wrap; }
-    nav button { width: auto; border-left: 0; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; }
-    nav button.on { border-bottom-color: var(--accent); }
-    nav button small, .side-foot { display: none; }
-    .guide { flex-direction: row; flex-wrap: wrap; }
-  }
   @media (max-width: 900px) {
-    .g2, .g3, .answer { grid-template-columns: 1fr; }
-    .answer .a, .answer .how, .answer .lbl { grid-column: 1; }
-    .k4, .k6 { grid-template-columns: 1fr 1fr; }
-    .kpi:nth-child(odd) { border-left: 0; }
-    .kpi:nth-child(n+3) { border-top: 1px solid var(--line); }
-    .legend { grid-template-columns: 1fr; }
-    .topbar { position: static; }
-    .titlebar { flex-direction: column; align-items: flex-start; }
-    .meta { text-align: left; white-space: normal; }
+    .g2, .g3 { grid-template-columns: 1fr; }
+    .g4, .g6 { grid-template-columns: 1fr 1fr; }
+    .controls { position: static; }
+    h1 { font-size: 30px; }
+    .tag { display: none; }
   }
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="side">
-    <div class="brand"><b>The Gilded Ace</b><span>Slot floor review · Jan – Jun 2025</span></div>
+<header>
+  <div class="wrap">
+    <div class="brand"><div class="logo">♠</div>The Gilded Ace · Floor analytics</div>
+    <div class="tag">Dashboard Royale · built on Databricks Free Edition</div>
+  </div>
+</header>
 
-    <div class="side-sec">
-      <div class="side-label">Sections</div>
-      <nav id="tabs" aria-label="Dashboard sections">
-        <button data-t="decision" class="on" data-kicker="Recommendation · Q6" data-title="Budget plan for the next 30 days"><span class="n">01</span><span><b>Recommendation</b><small>$100k budget plan</small></span></button>
-        <button data-t="machines" data-kicker="Machines · Q1" data-title="Which machines are truly underperforming?"><span class="n">02</span><span><b>Machines</b><small>Luck, exposure, availability</small></span></button>
-        <button data-t="demand" data-kicker="Demand · Q2" data-title="What changed in demand over six months?"><span class="n">03</span><span><b>Demand</b><small>Weekdays, events, access</small></span></button>
-        <button data-t="downtime" data-kicker="Downtime · Q3" data-title="What did machine downtime cost?"><span class="n">04</span><span><b>Downtime</b><small>Faults, staffing, lost theo</small></span></button>
-        <button data-t="players" data-kicker="Players · Q4" data-title="What did tracked players win and lose?"><span class="n">05</span><span><b>Players</b><small>Outcomes and concentration</small></span></button>
-        <button data-t="comps" data-kicker="Comps · Q5" data-title="What did the comp program cost?"><span class="n">06</span><span><b>Comps</b><small>Points price and reinvestment</small></span></button>
-        <button data-t="model" data-kicker="Forecast model" data-title="Forecast vs baseline on a time holdout"><span class="n">07</span><span><b>Model</b><small>Validation and error</small></span></button>
-        <button data-t="evidence" data-kicker="Evidence" data-title="Claims, sources and limitations"><span class="n">08</span><span><b>Evidence</b><small>Claims and sources</small></span></button>
-      </nav>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Luck, location, or a leak?</div>
+    <h1>Don't replace the bottom 10. <em>Move the question.</em></h1>
+    <p class="sub">The manager's list mostly measures <b>where</b> machines sit, not <b>what</b> they are. One machine shows a real payout anomaly worth inspecting. Every number below is recomputed in your browser from the Databricks gold tables for the period you choose.</p>
+    <div class="note">♦ The Gilded Ace is fictional and its data synthetic (TAMU Datathon <i>Dashboard Royale</i>). Only Las Vegas visitation (LVCVA) and Missouri slot benchmarks are real.</div>
+  </section>
+</main>
+
+<div class="controls">
+  <div class="wrap">
+    <label class="ctl">From <input type="date" id="start" min="2025-01-01" max="2025-06-30" value="2025-01-01"></label>
+    <label class="ctl">To <input type="date" id="end" min="2025-01-01" max="2025-06-30" value="2025-06-30"></label>
+    <div class="chips" id="presets" role="group" aria-label="Period presets">
+      <button data-s="2025-01-01" data-e="2025-06-30" class="on">Jan–Jun</button>
+      <button data-s="2025-01-01" data-e="2025-04-30">Jan–Apr</button>
+      <button data-s="2025-05-01" data-e="2025-06-30">May–Jun</button>
+      <button data-s="2025-03-03" data-e="2025-04-06">Walkway closed</button>
     </div>
-
-    <div class="side-sec">
-      <div class="side-label">Reviewer guide</div>
-      <div class="guide" aria-label="How to review this dashboard">
-        <button data-go="decision" data-focus="start">1. Change the period <span>→ toolbar</span></button>
-        <button data-go="machines" data-focus="bank">2. Drill into a bank or group <span>→ filters</span></button>
-        <button data-go="model">3. Model validation <span>→ section 07</span></button>
-        <button data-go="evidence">4. Trace a recommendation <span>→ section 08</span></button>
-      </div>
-      <details class="gloss">
-        <summary>Definitions</summary>
-        <dl>
-          <dt>Coin-in</dt><dd>Total amount wagered.</dd>
-          <dt>House win</dt><dd>Coin-in minus payouts. Swings with luck.</dd>
-          <dt>Theo</dt><dd>Expected win: bet × (1 − return to player). Luck-free.</dd>
-          <dt>Hold</dt><dd>House win ÷ coin-in (theo hold: theo ÷ coin-in). Ratio of sums.</dd>
-          <dt>Luck z</dt><dd>(House win − theo) ÷ its standard deviation. −2 to +2 is ordinary luck.</dd>
-          <dt>Hit z</dt><dd>Paying spins vs the published hit rate, in standard deviations.</dd>
-          <dt>Theo / available hour</dt><dd>Demand for a machine where it stands, free of luck and downtime.</dd>
-          <dt>Carded play</dt><dd>Play tracked on a loyalty card (≈66% of coin-in).</dd>
-        </dl>
-      </details>
-    </div>
-
-    <div class="side-foot">Fictional casino, synthetic data (TAMU Datathon <i>Dashboard Royale</i>). LVCVA visitation and Missouri benchmarks are real. Computed in Databricks Free Edition.</div>
-  </aside>
-
-  <div class="main">
-    <div class="topbar">
-      <div class="titlebar">
-        <div><div class="kicker" id="page-kicker">Recommendation · Q6</div><h1 id="page-title">Budget plan for the next 30 days</h1></div>
-        <div class="meta">Source: Databricks gold tables (<code>g_*</code>) · recomputed in the browser</div>
-      </div>
-      <div class="controls">
-        <label class="ctl" id="c-start">From <input type="date" id="start" min="2025-01-01" max="2025-06-30" value="2025-01-01"></label>
-        <label class="ctl" id="c-end">To <input type="date" id="end" min="2025-01-01" max="2025-06-30" value="2025-06-30"></label>
-        <div class="chips" id="presets" role="group" aria-label="Period presets">
-          <button data-s="2025-01-01" data-e="2025-06-30" class="on">Jan–Jun</button>
-          <button data-s="2025-01-01" data-e="2025-04-30">Jan–Apr</button>
-          <button data-s="2025-05-01" data-e="2025-06-30">May–Jun</button>
-          <button data-s="2025-03-03" data-e="2025-04-06">Walkway closed</button>
-        </div>
-        <label class="ctl" id="c-zone">Zone <select id="zone"><option value="all">All zones</option></select></label>
-        <label class="ctl" id="c-bank">Bank <select id="bank"><option value="all">All banks</option></select></label>
-        <button class="reset" id="reset" title="Back to Jan–Jun, all zones and banks">Reset</button>
-      </div>
-      <div class="scope" id="scope" aria-live="polite"></div>
-    </div>
-
-    <main class="content">
-      <div id="loading" class="loading">Loading data…</div>
-
-      <!-- 01 Recommendation -->
-      <section class="tab on" id="t-decision">
-        <div class="answer">
-          <div class="q">Q6 · How should we spend up to $100,000 over the next 30 days?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">Spend $28,500 on three actions (inspect 5 machines, one promotion weekend, Back Forty wayfinding) and keep $71,500. Do not replace the bottom 10.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">The table lists the manager's ten lowest earners and what actually drives each one. The priced plan below costs every action from the casino's action catalog; each row is backed by a claim in section 08.</p>
-        </div>
-        <div class="kpis k4">
-          <div class="kpi primary"><div class="label">House win (period)</div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
-          <div class="kpi"><div class="label">Observed hold vs theo hold</div><div class="value" id="k-hold">–</div><div class="foot" id="k-hold-f">–</div></div>
-          <div class="kpi"><div class="label">Budget spent</div><div class="value" id="k-spent">–</div><div class="foot">3 action types, 30 days from Jul 1</div></div>
-          <div class="kpi"><div class="label">Budget kept</div><div class="value" id="k-kept">–</div><div class="foot">Of $100,000</div></div>
-        </div>
-        <div class="grid g3">
-          <div class="card">
-            <div class="head"><div><h2>The manager's bottom 10, explained</h2><p class="sub">Lowest raw house win in the selected period, with the real driver of each.</p></div></div>
-            <div class="table-scroll"><table id="bottom10"></table></div>
-            <div class="legend" id="legend"></div>
-            <div class="src">Source: <code>g_machine_day</code> → luck z, hit z, exposure per machine · same logic as <code>g_machine_scorecard</code></div>
-          </div>
-          <div class="card story">
-            <h2>Plan summary</h2>
-            <p><b>Inspect 5 machines · $6,000.</b> M-1158 pays on far more spins than its published math, every month. The other four are the most negative luck results; inspection rules them in or out.</p>
-            <p><b>One promotion weekend · $15,000.</b> The February slot tournament added +18% coin-in (≈$80k theo) with no dip afterwards.</p>
-            <p><b>Back Forty wayfinding · $7,500.</b> The zone is weak for every theme and fell 30% when its walkway closed: access is the problem.</p>
-            <p><b>Keep $71,500.</b> Replacing machines in Back Forty didn't help (M-1120 → M-5076: $6.00 → $6.39 theo/hr). Extra technicians would recover only $1–4k.</p>
-          </div>
-        </div>
-        <div class="card">
-          <h2>Priced plan</h2>
-          <p class="sub">Cost = quantity × (unit cost + daily cost × max(0, 30 − lead days)) · <code>g_budget_plan</code></p>
-          <div class="table-scroll"><table id="budget"></table></div>
-        </div>
-      </section>
-
-      <!-- 02 Machines -->
-      <section class="tab" id="t-machines">
-        <div class="answer">
-          <div class="q">Q1 · Which machines are truly underperforming, after accounting for luck, exposure and availability?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">Only M-1158 looks wrong: it pays on 38.5% of spins vs 31.5% published. Most low earners sit in Back Forty, where every theme earns 41–55% less; the rest are ordinary luck or short time on the floor.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">Sort by <b>Hit z</b> to find machines that don't match their math, or by <b>Theo / avail. hr</b> for weak demand. Click a row for monthly history; hover a column name for its definition.</p>
-        </div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="head">
-            <div><h2>Machine scorecard</h2><p class="sub">Sortable · zone and bank filters apply</p></div>
-            <input type="search" id="search" placeholder="Find machine or theme" aria-label="Find a machine">
-          </div>
-          <div class="table-scroll"><table id="scorecard"></table></div>
-          <div class="detail" id="detail"><h3 id="detail-title"></h3><div id="detail-text" class="sub"></div><div class="chart short" id="c-detail"></div></div>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>Same theme, different zone</h2><p class="sub">Theo per available hour ($). Read across a row: every theme is weakest in Back Forty.</p><div class="chart tall" id="c-heat"></div></div>
-          <div class="card"><h2>Demand vs luck</h2><p class="sub">One dot per machine, colored by zone (Back Forty in maroon). Left = weak demand; below −2 = unusually unlucky.</p><div class="chart tall" id="c-scatter"></div></div>
-        </div>
-      </section>
-
-      <!-- 03 Demand -->
-      <section class="tab" id="t-demand">
-        <div class="answer">
-          <div class="q">Q2 · What changed in demand over the six months?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">Demand follows the weekday (Saturday ≈ +60% vs Tuesday) and events (slot tournament +18%). Back Forty fell ≈30% while its walkway was closed (Mar 3 – Apr 6) and recovered; new machines mostly pulled play from neighbours; June softened with Las Vegas visitation.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">Shaded days on the daily chart are events. Choose the <b>Walkway closed</b> preset or a zone to see the closure in the weekly zone chart.</p>
-        </div>
-        <div class="grid g3">
-          <div class="card"><h2>Daily floor coin-in</h2><p class="sub">Shaded days had an event.</p><div class="chart" id="c-daily"></div></div>
-          <div class="card"><h2>Average coin-in by weekday</h2><p class="sub">No-event days; Fri–Sun in solid blue.</p><div class="chart" id="c-weekday"></div></div>
-        </div>
-        <div class="grid g3">
-          <div class="card"><h2>Theo per day by zone, weekly</h2><p class="sub">Shaded: walkway closed. Back Forty (maroon) is the bold line; choose a zone to bring another forward.</p><div class="chart" id="c-zoneweek"></div></div>
-          <div class="card"><h2>Event lift vs weekday baseline</h2><p class="sub">Full period · <code>g_event_lift</code></p><div class="table-scroll"><table id="events"></table></div></div>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>Casino vs Las Vegas visitors</h2><p class="sub">Index, January = 1.0. LVCVA data is real but published after 2025: context, not a forecast input.</p><div class="chart short" id="c-city"></div></div>
-          <div class="card"><h2>Did new machines grow the floor?</h2><p class="sub">Aurora Link bank B-51 opened Mar 24. Theo per day, walkway-closure weeks excluded.</p><div class="chart short" id="c-aurora"></div></div>
-        </div>
-      </section>
-
-      <!-- 04 Downtime -->
-      <section class="tab" id="t-downtime">
-        <div class="answer">
-          <div class="q">Q3 · How much did machine downtime cost, and why did it happen?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">About 5,000 down hours cost at most ≈$90k of theo in six months. Ridgeline machines fail 2–4× as often; day-shift technicians ran short in Apr–May and waits rose. Too small to justify paying for extra staff.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">Lost theo values each down hour at that machine's own theo rate, so it is an upper bound (players may move to another machine). Use Zone or Bank to isolate one area.</p>
-        </div>
-        <div class="kpis k4">
-          <div class="kpi primary"><div class="label">Downtime</div><div class="value" id="k-down">–</div><div class="foot" id="k-down-f">–</div></div>
-          <div class="kpi"><div class="label">Lost theo (upper bound)</div><div class="value" id="k-lost">–</div><div class="foot">Down hours × machine's own theo per available hour</div></div>
-          <div class="kpi"><div class="label">Fault tickets</div><div class="value" id="k-faults">–</div><div class="foot" id="k-faults-f">–</div></div>
-          <div class="kpi"><div class="label">Average wait for a tech</div><div class="value" id="k-wait">–</div><div class="foot">Ticket opened → work started</div></div>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>Lost theo by month and manufacturer</h2><p class="sub">Stacked by manufacturer.</p><div class="chart" id="c-lost"></div></div>
-          <div class="card"><h2>Reliability (exposure-adjusted)</h2><p class="sub">Faults per 1,000 machine-days on the floor.</p><div class="chart" id="c-rel"></div></div>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>Slot technicians on shift</h2><p class="sub">Daily average, actual (solid) vs planned (dashed). Day shift fell short in Apr–May.</p><div class="chart" id="c-staff"></div></div>
-          <div class="card"><h2>Average wait for a technician (hours)</h2><p class="sub">By month and the shift the fault was opened in.</p><div class="chart" id="c-wait"></div></div>
-        </div>
-      </section>
-
-      <!-- 05 Players -->
-      <section class="tab" id="t-players">
-        <div class="answer">
-          <div class="q">Q4 · What did tracked players wager, get back, and actually win or lose?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">96,559 carded players lost $15.6M net and 16% finished ahead. The top 10% of players by theo account for 64% of house win.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">Carded play only (≈66% of coin-in). Players' net = payout − coin-in, so negative means players lost. Who is "ahead" depends on the whole period, so this section uses fixed periods instead of the toolbar dates.</p>
-        </div>
-        <div class="card" style="margin-bottom:16px;padding:10px 14px">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <span class="sub" style="margin:0 6px 0 0">Player filters</span>
-            <label class="ctl">Period <select id="p-preset"></select></label>
-            <label class="ctl">Tier <select id="p-tier"><option value="all">All</option></select></label>
-            <label class="ctl">Region <select id="p-region"><option value="all">All</option></select></label>
-            <label class="ctl">Age <select id="p-age"><option value="all">All</option></select></label>
-          </div>
-        </div>
-        <div class="kpis k6">
-          <div class="kpi"><div class="label">Tracked players</div><div class="value" id="p-n">–</div></div>
-          <div class="kpi"><div class="label">Wagered</div><div class="value" id="p-ci">–</div></div>
-          <div class="kpi"><div class="label">Got back</div><div class="value" id="p-po">–</div></div>
-          <div class="kpi primary"><div class="label">Players' net</div><div class="value" id="p-net">–</div></div>
-          <div class="kpi"><div class="label">Expected loss (theo)</div><div class="value" id="p-th">–</div></div>
-          <div class="kpi"><div class="label">Share ahead</div><div class="value" id="p-ahead">–</div></div>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>House win by player decile</h2><p class="sub">Deciles by full-period theo (1 = top 10%). <span id="p-conc"></span></p><div class="chart" id="c-decile"></div></div>
-          <div class="card"><h2>Players' net and comps by tier</h2><p class="sub">We do not recommend targeting heavy losers with promotions.</p><div class="chart" id="c-tier"></div></div>
-        </div>
-      </section>
-
-      <!-- 06 Comps -->
-      <section class="tab" id="t-comps">
-        <div class="answer">
-          <div class="q">Q5 · What did the comp program cost, and what changed?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">On May 1 the points price of every comp roughly halved. Comp cost rose from 1.11% of tracked theo (Jan) to 1.32% (Jun) with no visible lift in play.</p>
-          <div class="lbl">How to read</div>
-          <p class="how">The left chart shows points needed per item (a beer went from ≈114 to ≈53 points; its value and cost did not change). Points are earned ≈20× faster than redeemed, so a cheaper price raises the value of the unredeemed balance. Comp cost is counted once (it is inside POS cost of goods).</p>
-        </div>
-        <div class="grid g2">
-          <div class="card"><h2>Points price by comp item</h2><p class="sub">Points per redemption, by month.</p><div class="chart" id="c-points"></div></div>
-          <div class="card"><h2>Comp cost and reinvestment rate</h2><p class="sub">Bars: comp cost to the house. Line: comp cost ÷ tracked theo.</p><div class="chart" id="c-reinvest"></div></div>
-        </div>
-      </section>
-
-      <!-- 07 Model -->
-      <section class="tab" id="t-model">
-        <div class="answer">
-          <div class="q">Model · Can daily coin-in be forecast better than a simple baseline?</div>
-          <div class="lbl">Finding</div>
-          <p class="a">Yes. On the unseen May–Jun holdout, a weekday-mean forecast cuts the average daily error from $218k to $69k; adding pre-announced events brings it to $51k.</p>
-          <div class="lbl">Method</div>
-          <p class="how"><b>Train</b> Jan 1 – Apr 30, <b>holdout</b> May 1 – Jun 30 (shaded); every forecast is frozen before the holdout. <b>Baseline:</b> constant training mean. <b>Model:</b> training mean for that weekday. <b>Variant:</b> weekday mean of no-event days × average event uplift, for events announced in advance. No holdout actuals or later tourism data are inputs.</p>
-          <div class="lbl">Decision</div>
-          <p class="how">Fri–Sun run ≈30–60% above Tue–Wed and pre-announced events add ≈18% more, so technician coverage and the funded promotion weekend go on Fri–Sun, and the frozen forecast is the counterfactual for measuring the promotion's lift.</p>
-        </div>
-        <div class="grid g3">
-          <div class="card"><h2>Actual vs forecast daily coin-in</h2><p class="sub">Shaded: holdout. Drag the slider to zoom.</p><div class="chart tall" id="c-forecast"></div></div>
-          <div class="card"><h2>Mean absolute error</h2><p class="sub">Average daily miss in dollars; lower is better · <code>g_forecast_scores</code></p><div class="table-scroll"><table id="scores"></table></div></div>
-        </div>
-      </section>
-
-      <!-- 08 Evidence -->
-      <section class="tab" id="t-evidence">
-        <div class="answer">
-          <div class="q">Evidence · Where does each claim come from?</div>
-          <div class="lbl">Contents</div>
-          <p class="a">Every claim, the Databricks table and query behind it, the alternative explanation we checked, and its limitation.</p>
-          <div class="lbl">Sources</div>
-          <p class="how">Tables named <code>g_…</code> are built by <code>databricks/02_build_gold.sql</code> in Databricks Free Edition and exported by <code>03_export_public.py</code>.</p>
-        </div>
-        <div class="card">
-          <div class="table-scroll" style="max-height:none"><table id="claims"></table></div>
-          <p class="src"><b>AI use:</b> an AI coding assistant (Cursor) helped write the SQL, the Databricks notebooks, this page and draft text. All numbers come from the queries above and were re-run in Databricks.</p>
-        </div>
-      </section>
-
-      <footer>Dashboard Royale · TAMU Datathon · fictional casino, synthetic data · computed in Databricks Free Edition, served as a static export.</footer>
-    </main>
+    <label class="ctl">Zone <select id="zone"><option value="all">All zones</option></select></label>
+    <label class="ctl">Bank <select id="bank"><option value="all">All banks</option></select></label>
   </div>
 </div>
+
+<main class="wrap">
+  <nav id="tabs" aria-label="Dashboard pages">
+    <button data-t="decision" class="on">1 · Decision</button>
+    <button data-t="machines">2 · Machines</button>
+    <button data-t="demand">3 · Demand</button>
+    <button data-t="downtime">4 · Downtime</button>
+    <button data-t="players">5 · Players</button>
+    <button data-t="comps">6 · Comps</button>
+    <button data-t="model">7 · Model</button>
+    <button data-t="evidence">8 · Evidence</button>
+  </nav>
+
+  <div id="loading" class="loading">Loading data…</div>
+
+  <!-- 1 Decision -->
+  <section class="tab on" id="t-decision">
+    <div class="grid g4">
+      <div class="card kpi feature"><div class="label">House win (period)</div><div class="value" id="k-hw">–</div><div class="foot" id="k-hw-f">–</div></div>
+      <div class="card kpi"><div class="label">Observed hold vs theo hold</div><div class="value" id="k-hold">–</div><div class="foot" id="k-hold-f">–</div></div>
+      <div class="card kpi"><div class="label">Budget spent</div><div class="value" id="k-spent">–</div><div class="foot">3 action types, 30 days from Jul 1</div></div>
+      <div class="card kpi"><div class="label">Budget kept</div><div class="value" id="k-kept">–</div><div class="foot">Of $100,000</div></div>
+    </div>
+    <div class="grid g3">
+      <div class="card">
+        <div class="head"><div><h2>The manager's bottom 10, explained</h2><p class="sub">Lowest raw house win in the selected period, with what is really driving each one.</p></div></div>
+        <div class="table-scroll"><table id="bottom10"></table></div>
+        <div class="src">Source: <code>g_machine_day</code> → luck z, hit z, exposure per machine · same logic as <code>g_machine_scorecard</code></div>
+      </div>
+      <div class="card story">
+        <h2>What we'd do with $100k</h2>
+        <p><b>Inspect 5 machines ($6,000).</b> M-1158 pays on far more spins than its published math, every month. The other four are the most negative luck results; inspection rules them in or out.</p>
+        <p><b>One promotion weekend ($15,000).</b> The February slot tournament added +18% coin-in (≈$80k theo) with no dip afterwards.</p>
+        <p><b>Wayfinding for Back Forty ($7,500).</b> The zone is weak for every theme and fell 30% when its walkway closed: access is the problem.</p>
+        <p><b>Keep $71,500.</b> Replacing machines in Back Forty didn't help (M-1120 → M-5076: $6.00 → $6.39 theo/hr). Extra technicians would recover only $1–4k.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Priced plan</h2>
+      <p class="sub">Cost = quantity × (unit cost + daily cost × max(0, 30 − lead days)) · <code>g_budget_plan</code></p>
+      <div class="table-scroll"><table id="budget"></table></div>
+    </div>
+  </section>
+
+  <!-- 2 Machines -->
+  <section class="tab" id="t-machines">
+    <div class="card story" style="margin-bottom:16px">
+      <p><b>Luck z</b> = (house win − theo) ÷ its standard deviation (Σ bet² × each game's per-spin payout variance); |z| &lt; 2 is ordinary luck. <b>Hit z</b> compares payout-positive spins with the published hit probability; a large value means the game isn't behaving like its math — a lead to inspect, not proof of wrongdoing. <b>Theo per available hour</b> removes luck and downtime: it is demand for the machine where it stands.</p>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="head">
+        <div><h2>Machine scorecard</h2><p class="sub">Click a column to sort, a row for monthly detail. Zone/bank filters apply.</p></div>
+        <input type="search" id="search" placeholder="Find machine or theme…" aria-label="Find a machine">
+      </div>
+      <div class="table-scroll"><table id="scorecard"></table></div>
+      <div class="detail" id="detail"><h3 id="detail-title"></h3><div id="detail-text" class="sub"></div><div class="chart short" id="c-detail"></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Same theme, different zone</h2><p class="sub">Theo per available hour ($). Every theme is weakest in Back Forty.</p><div class="chart tall" id="c-heat"></div></div>
+      <div class="card"><h2>Demand vs luck</h2><p class="sub">Each dot is a machine. Low-left = weak demand; below −2 = unusually unlucky.</p><div class="chart tall" id="c-scatter"></div></div>
+    </div>
+  </section>
+
+  <!-- 3 Demand -->
+  <section class="tab" id="t-demand">
+    <div class="card story" style="margin-bottom:16px">
+      <p><b>Three drivers.</b> Weekday rhythm (Saturday ≈ +60% vs Tuesday) · events (sports weekends and the casino's slot tournament +16–23%, conventions little) · access: the Main Entrance → Back Forty walkway closed for renovation Mar 3 – Apr 6 and Back Forty theo fell ≈30%, then recovered. June softened with Las Vegas visitation.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h2>Daily floor coin-in</h2><p class="sub">Shaded days had an event.</p><div class="chart" id="c-daily"></div></div>
+      <div class="card"><h2>Average coin-in by weekday</h2><p class="sub">No-event days in the period.</p><div class="chart" id="c-weekday"></div></div>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h2>Theo per day by zone, weekly</h2><p class="sub">Shaded: walkway closed. Pick a zone above to highlight it.</p><div class="chart" id="c-zoneweek"></div></div>
+      <div class="card"><h2>Event lift vs weekday baseline</h2><p class="sub">Full period · <code>g_event_lift</code></p><div class="table-scroll"><table id="events"></table></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Casino vs Las Vegas visitors</h2><p class="sub">Index, January = 1.0. LVCVA data is real but published after 2025, so it is context, not a forecast input.</p><div class="chart short" id="c-city"></div></div>
+      <div class="card"><h2>Did new machines grow the floor?</h2><p class="sub">Eight Aurora Link machines (bank B-51) opened Mar 24. Theo per day, excluding walkway-closure weeks.</p><div class="chart short" id="c-aurora"></div></div>
+    </div>
+  </section>
+
+  <!-- 4 Downtime -->
+  <section class="tab" id="t-downtime">
+    <div class="grid g4">
+      <div class="card kpi feature"><div class="label">Downtime</div><div class="value" id="k-down">–</div><div class="foot" id="k-down-f">–</div></div>
+      <div class="card kpi"><div class="label">Lost theo (upper bound)</div><div class="value" id="k-lost">–</div><div class="foot">Down hours × machine's own theo per available hour</div></div>
+      <div class="card kpi"><div class="label">Fault tickets</div><div class="value" id="k-faults">–</div><div class="foot" id="k-faults-f">–</div></div>
+      <div class="card kpi"><div class="label">Average wait for a tech</div><div class="value" id="k-wait">–</div><div class="foot">Ticket opened → work started</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Lost theo by month and manufacturer</h2><div class="chart" id="c-lost"></div></div>
+      <div class="card"><h2>Reliability (exposure-adjusted)</h2><p class="sub">Faults per 1,000 machine-days on the floor.</p><div class="chart" id="c-rel"></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Slot technicians on shift</h2><p class="sub">Daily average, actual vs planned. Day shift fell short in Apr–May.</p><div class="chart" id="c-staff"></div></div>
+      <div class="card"><h2>Average wait for a technician (hours)</h2><p class="sub">By month and shift the fault was opened in.</p><div class="chart" id="c-wait"></div></div>
+    </div>
+  </section>
+
+  <!-- 5 Players -->
+  <section class="tab" id="t-players">
+    <div class="card" style="margin-bottom:16px">
+      <div class="head" style="margin:0">
+        <div class="story"><p style="margin:0"><b>Carded play only</b> (≈66% of coin-in). Players' net = payout − coin-in. Who is "ahead" depends on the whole period, so this page uses fixed periods.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label class="ctl">Period <select id="p-preset"></select></label>
+          <label class="ctl">Tier <select id="p-tier"><option value="all">All</option></select></label>
+          <label class="ctl">Region <select id="p-region"><option value="all">All</option></select></label>
+          <label class="ctl">Age <select id="p-age"><option value="all">All</option></select></label>
+        </div>
+      </div>
+    </div>
+    <div class="grid g6">
+      <div class="card kpi"><div class="label">Tracked players</div><div class="value" id="p-n">–</div></div>
+      <div class="card kpi"><div class="label">Wagered</div><div class="value" id="p-ci">–</div></div>
+      <div class="card kpi"><div class="label">Got back</div><div class="value" id="p-po">–</div></div>
+      <div class="card kpi feature"><div class="label">Players' net</div><div class="value" id="p-net">–</div></div>
+      <div class="card kpi"><div class="label">Expected loss (theo)</div><div class="value" id="p-th">–</div></div>
+      <div class="card kpi"><div class="label">Share ahead</div><div class="value" id="p-ahead">–</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>House win by player decile</h2><p class="sub">Deciles by full-period theo (1 = top 10%). <span id="p-conc"></span></p><div class="chart" id="c-decile"></div></div>
+      <div class="card"><h2>Players' net and comps by tier</h2><p class="sub">We do not recommend targeting heavy losers with promotions.</p><div class="chart" id="c-tier"></div></div>
+    </div>
+  </section>
+
+  <!-- 6 Comps -->
+  <section class="tab" id="t-comps">
+    <div class="card story" style="margin-bottom:16px">
+      <p><b>What changed: on May 1 every comp's points price roughly halved</b> (a beer went from ≈114 to ≈53 points); menu value and cost per item did not change. Redemptions rose only ≈8% and comp cost went from 1.11% of tracked theo (Jan) to 1.32% (Jun) with no visible lift in play. Points are earned ≈20× faster than redeemed, so a cheaper price raises the value of the unredeemed balance. Comp cost is counted once (it is inside POS cost of goods).</p>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>Points price by comp item</h2><div class="chart" id="c-points"></div></div>
+      <div class="card"><h2>Comp cost and reinvestment rate</h2><p class="sub">Bars: comp cost to the house. Line: comp cost ÷ tracked theo.</p><div class="chart" id="c-reinvest"></div></div>
+    </div>
+  </section>
+
+  <!-- 7 Model -->
+  <section class="tab" id="t-model">
+    <div class="card story" style="margin-bottom:16px">
+      <p><b>Question:</b> how much will the floor wager on a given day? <b>Train</b> Jan 1 – Apr 30, <b>holdout</b> May 1 – Jun 30 (time split; both forecasts frozen before testing). <b>Baseline:</b> constant training-period daily mean. <b>Model:</b> training mean for that weekday. <b>Variant:</b> weekday mean of no-event days × average training-period event uplift, applied only to events announced in advance. No holdout actuals or later-published tourism data are inputs.</p>
+      <p><b>Decision it changes:</b> Fri–Sun run ≈30–60% above Tue–Wed and pre-announced events add ≈18% more, so technician coverage and the funded promotion weekend go on Fri–Sun — and the frozen forecast is the counterfactual for measuring the promotion's lift.</p>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h2>Actual vs forecast daily coin-in</h2><p class="sub">Shaded: holdout.</p><div class="chart tall" id="c-forecast"></div></div>
+      <div class="card"><h2>Mean absolute error</h2><p class="sub">Lower is better · <code>g_forecast_scores</code></p><div class="table-scroll"><table id="scores"></table></div></div>
+    </div>
+  </section>
+
+  <!-- 8 Evidence -->
+  <section class="tab" id="t-evidence">
+    <div class="card">
+      <h2>Claims & evidence</h2>
+      <p class="sub">Every table is built by <code>databricks/02_build_gold.sql</code> in Databricks Free Edition and exported by <code>03_export_public.py</code>.</p>
+      <div class="table-scroll" style="max-height:none"><table id="claims"></table></div>
+      <p class="src"><b>AI use:</b> an AI coding assistant (Cursor) helped write the SQL, the Databricks notebooks, this page and draft text. All numbers come from the queries above and were re-run in Databricks.</p>
+    </div>
+  </section>
+
+  <footer>Dashboard Royale · TAMU Datathon · fictional casino, synthetic data · computed in Databricks Free Edition, served as a static export.</footer>
+</main>
 
 <script src="app.js"></script>
 </body>

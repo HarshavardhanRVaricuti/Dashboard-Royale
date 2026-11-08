@@ -24,48 +24,12 @@ const fix = (v, p = 2) => (v == null || isNaN(v) ? "–" : v.toFixed(p));
 const int = v => (v == null ? "–" : Math.round(v).toLocaleString("en-US"));
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-// Chart palette: distinct, colorblind-friendly categorical colors (light and dark variants in CSS); maroon marks the key finding.
-const pal = () => ({
-  accent: css("--accent"), g1: css("--g1"), g2: css("--g2"), g3: css("--g3"), g4: css("--g4"), muted: css("--muted"),
-  maroon: css("--c-maroon"), blue: css("--c-blue"), green: css("--c-green"), orange: css("--c-orange"),
-  purple: css("--c-purple"), gold: css("--c-gold"), teal: css("--c-teal"), gray: css("--c-gray"),
-});
-const alpha = (hex, a) => {
-  const n = parseInt(hex.replace("#", ""), 16);
-  return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+const ZONE_COLORS = {
+  "Back Forty": "#D55E00", "Bar Row": "#56B4E9", "Center Pit": "#009E73", "Garage Entrance": "#CC79A7",
+  "High-Limit Room": "#E69F00", "Hotel Corridor": "#0072B2", "Main Entrance": "#8C8C8C",
 };
-const zoneColor = z => {
-  const p = pal();
-  return { "Back Forty": p.maroon, "Main Entrance": p.blue, "Center Pit": p.green, "Hotel Corridor": p.orange,
-    "High-Limit Room": p.purple, "Bar Row": p.gold, "Garage Entrance": p.teal }[z] || p.gray;
-};
-const MFRS = ["Halcyon", "Northwind", "Ridgeline"];
-const mfrColor = m => ({ Halcyon: pal().green, Northwind: pal().blue, Ridgeline: pal().orange }[m]);
-const shiftColor = s => ({ day: pal().orange, swing: pal().blue, grave: pal().purple }[s]);
-
-const DIAGNOSES = [
-  ["leak", "Leak?", "hit rate far from the game's published math (|hit z| > 4): inspect"],
-  ["exp", "Exposure / downtime", "on the floor for under 80% of the period, or available under 97% of scheduled hours"],
-  ["loc", "Location", "sits in Back Forty, where every theme earns less; its result is within luck"],
-  ["luck", "Luck", "result within the normal range of luck, or unlucky (z < −2) and worth re-testing next period"],
-];
-const TIPS = {
-  manager_rank: "Rank by raw house win in the period (1 = lowest): the manager's list",
-  days: "Days the machine was on the floor in the period",
-  availability: "Available hours ÷ scheduled hours (1 − downtime)",
-  occupancy: "Share of available hours with a player",
-  hw: "Coin-in − payouts: what the casino kept",
-  th: "Theoretical win = bet × (1 − RTP), the luck-free expectation",
-  luck: "House win − theo",
-  luck_z: "(House win − theo) ÷ its standard deviation. Between −2 and +2 = ordinary luck",
-  hold: "House win ÷ coin-in",
-  theo_hold: "Theo ÷ coin-in: the hold the game's math promises",
-  hit: "Share of spins that paid anything",
-  pub_hit: "Hit rate the game's published math predicts",
-  hit_z: "(Paying spins − expected) ÷ standard deviation. Above 4 in size = not chance",
-  theo_hr: "Theo ÷ available hours: demand for the machine where it stands, free of luck and downtime",
-};
-const tip = k => (TIPS[k] ? ` title="${TIPS[k]}"` : "");
+const MFR_COLORS = { Halcyon: "#009E73", Northwind: "#0072B2", Ridgeline: "#D55E00" };
+const SHIFT_COLORS = { day: "#E69F00", swing: "#0072B2", grave: "#555F6B" };
 
 const S = { s: 0, e: 180, zone: "all", bank: "all", tab: "decision", sort: "manager_rank", asc: true, q: "", sel: null };
 let MD, PL, TB;
@@ -135,12 +99,11 @@ function chart(id) {
 }
 
 function base(extra = {}) {
-  const ink = css("--ink"), muted = css("--muted"), line = css("--line"), p = pal();
+  const ink = css("--ink"), muted = css("--muted"), line = css("--line");
   return {
-    color: [p.blue, p.orange, p.green, p.purple, p.maroon, p.teal, p.gold, p.gray],
     textStyle: { fontFamily: "Inter, system-ui, sans-serif", color: ink },
     grid: { left: 64, right: 20, top: 36, bottom: 40, containLabel: false },
-    tooltip: { trigger: "axis", confine: true, backgroundColor: css("--card"), borderColor: line, textStyle: { color: ink } },
+    tooltip: { trigger: "axis", confine: true },
     legend: { top: 0, textStyle: { color: muted, fontSize: 11 }, type: "scroll" },
     xAxis: { axisLine: { lineStyle: { color: line } }, axisLabel: { color: muted }, splitLine: { show: false } },
     yAxis: { axisLine: { show: false }, axisLabel: { color: muted }, splitLine: { lineStyle: { color: line, type: "dashed" } } },
@@ -175,14 +138,13 @@ function renderDecision() {
   $("k-kept").textContent = "$" + int(100000 - spent);
 
   const list = machineAgg(S.s, S.e).sort((a, b) => a.manager_rank - b.manager_rank).slice(0, 10);
-  $("bottom10").innerHTML = `<thead><tr><th${tip("manager_rank")}>#</th><th>Machine</th><th>Zone</th><th class="num"${tip("days")}>Days</th>
-    <th class="num"${tip("hw")}>House win</th><th class="num"${tip("th")}>Theo</th><th class="num"${tip("luck_z")}>Luck z</th><th class="num"${tip("hit_z")}>Hit z</th>
-    <th class="num"${tip("theo_hr")}>Theo/hr</th><th>What's going on</th></tr></thead><tbody>` +
+  $("bottom10").innerHTML = `<thead><tr><th>#</th><th>Machine</th><th>Zone</th><th class="num">Days</th>
+    <th class="num">House win</th><th class="num">Theo</th><th class="num">Luck z</th><th class="num">Hit z</th>
+    <th class="num">Theo/hr</th><th>What's going on</th></tr></thead><tbody>` +
     list.map(r => `<tr><td>${r.manager_rank}</td><td><b>${r.id}</b><br><span class="sub">${esc(r.theme)}</span></td>
       <td>${esc(r.zone)}</td><td class="num">${r.days}</td><td class="num">${usd(r.hw)}</td><td class="num">${usd(r.th)}</td>
       <td class="num">${fix(r.luck_z)}</td><td class="num">${fix(r.hit_z, 1)}</td><td class="num">$${fix(r.theo_hr)}</td>
       <td>${pill(r.diagnosis)}</td></tr>`).join("") + "</tbody>";
-  $("legend").innerHTML = DIAGNOSES.map(([cls, name, text]) => `<span>${pill([cls, name])} ${esc(text)}</span>`).join("");
 
   $("budget").innerHTML = `<thead><tr><th>Action</th><th class="num">Qty</th><th>Targets</th><th class="num">Cost</th>
     <th class="num">Lead</th><th>Evidence</th><th>Expected effect</th><th>Uncertainty</th><th>How we'll know</th></tr></thead><tbody>` +
@@ -223,7 +185,7 @@ function renderMachines() {
     return (A > B ? 1 : A < B ? -1 : 0) * (S.asc ? 1 : -1);
   });
   $("scorecard").innerHTML = "<thead><tr>" + SCORE_COLS.map(([k, label, , isNum]) =>
-    `<th data-k="${k}" class="${isNum ? "num" : ""}"${tip(k)}>${label}${k === S.sort ? (S.asc ? " ↑" : " ↓") : ""}</th>`).join("") +
+    `<th data-k="${k}" class="${isNum ? "num" : ""}">${label}${k === S.sort ? (S.asc ? " ↑" : " ↓") : ""}</th>`).join("") +
     "</tr></thead><tbody>" + list.map(r => `<tr class="click ${S.sel === r.m ? "on" : ""}" data-m="${r.m}">` +
       SCORE_COLS.map(([, , fmt, isNum]) => `<td class="${isNum ? "num" : ""}">${fmt(r)}</td>`).join("") + "</tr>").join("") +
     (list.length ? "" : `<tr><td colspan="${SCORE_COLS.length}" class="sub">No machines match.</td></tr>`) + "</tbody>";
@@ -245,38 +207,33 @@ function renderMachines() {
     data.push([+z, themes.indexOf(t), +(c.th / c.av).toFixed(2)]);
   });
   const vals = data.map(d => d[2]);
-  const lo = Math.min(...vals), hi = Math.max(...vals);
-  const cells = data.map(v => ({ value: v, label: { color: (v[2] - lo) / (hi - lo) > 0.55 ? css("--heat-ink-hi") : css("--ink") } }));
   set("c-heat", base({
     tooltip: { formatter: p => `${themes[p.value[1]]} · ${MD.zones[p.value[0]]}<br><b>$${p.value[2].toFixed(2)}</b> theo / available hr` },
     grid: { left: 110, right: 20, top: 10, bottom: 90 },
     xAxis: { type: "category", data: MD.zones, axisLabel: { color: css("--muted"), rotate: 30, interval: 0 } },
     yAxis: { type: "category", data: themes, axisLabel: { color: css("--muted") } },
-    visualMap: { min: lo, max: hi, orient: "horizontal", left: "center", bottom: 0,
-      itemHeight: 160, itemWidth: 10, text: ["high", "low"], textStyle: { color: css("--muted") },
-      inRange: { color: ["--heat-lo", "--heat-m1", "--heat-m2", "--heat-hi"].map(css) } },
-    series: [{ type: "heatmap", data: cells, itemStyle: { borderColor: css("--card"), borderWidth: 2 },
-      label: { show: true, formatter: p => p.value[2].toFixed(1), fontSize: 10, color: css("--ink") } }],
+    visualMap: { min: Math.min(...vals), max: Math.max(...vals), orient: "horizontal", left: "center", bottom: 0,
+      itemHeight: 160, text: ["high", "low"], textStyle: { color: css("--muted") },
+      inRange: { color: ["#a8432f", "#f4ecd9", "#234f3b"] } },
+    series: [{ type: "heatmap", data, label: { show: true, formatter: p => p.value[2].toFixed(1), fontSize: 10 } }],
   }));
 
   // scatter: theo per hour vs luck z
   const byZone = {};
   list.forEach(r => (byZone[r.zone] = byZone[r.zone] || []).push(r));
   set("c-scatter", base({
-    grid: { left: 56, right: 30, top: 56, bottom: 40 },
     tooltip: { trigger: "item", formatter: p => `<b>${p.data.r.id}</b> ${esc(p.data.r.theme)}<br>${esc(p.data.r.zone)}<br>` +
       `Theo/hr $${fix(p.data.r.theo_hr)} · luck z ${fix(p.data.r.luck_z)} · hit z ${fix(p.data.r.hit_z, 1)}` },
     xAxis: { type: "value", name: "Theo per available hour ($)", nameLocation: "middle", nameGap: 26, scale: true,
       axisLabel: { color: css("--muted") }, splitLine: { show: false } },
-    yAxis: { type: "value", name: "Luck z", nameTextStyle: { color: css("--muted"), align: "left" }, axisLabel: { color: css("--muted") },
+    yAxis: { type: "value", name: "Luck z", axisLabel: { color: css("--muted") },
       splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     series: Object.entries(byZone).map(([z, rs]) => ({
-      name: z, type: "scatter", symbolSize: 8, itemStyle: { color: zoneColor(z), opacity: 0.75 },
+      name: z, type: "scatter", symbolSize: 9, itemStyle: { color: ZONE_COLORS[z], opacity: 0.85 },
       data: rs.map(r => ({ value: [r.theo_hr, r.luck_z], r, symbolSize: r.diagnosis[0] === "leak" ? 18 : 9,
-        itemStyle: r.diagnosis[0] === "leak" ? { color: pal().maroon, borderColor: css("--ink"), borderWidth: 2, opacity: 1 } : undefined,
-        label: r.diagnosis[0] === "leak" ? { show: true, formatter: r.id, position: "right", color: css("--ink"), fontWeight: 600 } : undefined })),
+        itemStyle: r.diagnosis[0] === "leak" ? { borderColor: "#000", borderWidth: 2 } : undefined })),
       markLine: z === Object.keys(byZone)[0] ? { silent: true, symbol: "none", lineStyle: { color: css("--muted"), type: "dashed" },
-        data: [{ yAxis: -2 }, { yAxis: 2 }], label: { formatter: p => (p.value > 0 ? "+2" : "−2"), color: css("--muted") } } : undefined,
+        data: [{ yAxis: -2 }, { yAxis: 2 }], label: { formatter: "±2" } } : undefined,
     })),
   }));
 }
@@ -304,8 +261,8 @@ function renderDetail(all) {
     xAxis: { type: "category", data: ks.map(k => MONTH_LABEL[k]), axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", axisLabel: { color: css("--muted"), formatter: "{value}%" }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     series: [
-      line("Hold", a => a.hw / a.ci, pal().blue), line("Theo hold", a => a.th / a.ci, pal().blue, true),
-      line("Hit rate", a => a.ps / a.sp, pal().orange), line("Published hit", a => a.eh / a.sp, pal().orange, true),
+      line("Hold", a => a.hw / a.ci, "#D55E00"), line("Theo hold", a => a.th / a.ci, "#D55E00", true),
+      line("Hit rate", a => a.ps / a.sp, "#0072B2"), line("Published hit", a => a.eh / a.sp, "#0072B2", true),
     ],
   })));
 }
@@ -333,8 +290,8 @@ function renderDemand() {
       return `<b>${P.gaming_date[i]}</b> ${P.local_weekday[i]}<br>Coin-in ${usd(P.coin_in_usd[i])}` +
         (P.events_active[i] ? `<br>${esc(P.events_active[i])}` : ""); } },
     series: [{ name: "Coin-in", type: "line", data: idx.map(i => P.coin_in_usd[i]), showSymbol: false,
-      lineStyle: { color: pal().blue, width: 1.6 }, itemStyle: { color: pal().blue },
-      markArea: { silent: true, itemStyle: { color: alpha(pal().gold, 0.22) }, label: { show: false },
+      lineStyle: { color: css("--green"), width: 1.8 }, itemStyle: { color: css("--green") },
+      markArea: { silent: true, itemStyle: { color: "rgba(184,151,90,.22)" }, label: { show: false },
         data: eventAreas(dates, idx.map(i => P.events_active[i])) } }],
   }));
 
@@ -345,7 +302,7 @@ function renderDemand() {
     yAxis: { type: "value", ...usdAxis, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => usd(v) },
     series: [{ type: "bar", name: "Avg coin-in", data: order.map(o => wk[o] ? wk[o][0] / wk[o][1] : null),
-      itemStyle: { color: p => (["Fri", "Sat", "Sun"].includes(order[p.dataIndex]) ? pal().blue : alpha(pal().blue, 0.4)), borderRadius: [2, 2, 0, 0] } }],
+      itemStyle: { color: css("--green"), borderRadius: [4, 4, 0, 0] } }],
   }));
 
   // weekly zone theo per day
@@ -367,10 +324,10 @@ function renderDemand() {
     series: MD.zones.map((z, zi) => ({
       name: z, type: "line", showSymbol: false,
       data: wl.map(w => { const a = wz.get(zi + "|" + w); return a ? +(a.th / a.days.size).toFixed(0) : null; }),
-      lineStyle: { color: zoneColor(z), width: S.zone === z || (S.zone === "all" && z === "Back Forty") ? 3.5 : 1.4,
+      lineStyle: { color: ZONE_COLORS[z], width: S.zone === z || (S.zone === "all" && z === "Back Forty") ? 3.5 : 1.4,
         opacity: S.zone === "all" || S.zone === z ? 1 : 0.35 },
-      itemStyle: { color: zoneColor(z) },
-      markArea: zi === 0 ? { silent: true, itemStyle: { color: alpha(pal().gold, 0.18) },
+      itemStyle: { color: ZONE_COLORS[z] },
+      markArea: zi === 0 ? { silent: true, itemStyle: { color: "rgba(213,94,0,.10)" },
         data: [[{ xAxis: wl.findIndex(w => w + 6 >= CLOSURE[0]) }, { xAxis: wl.findLastIndex(w => w <= CLOSURE[1]) }]] } : undefined,
     })),
   }));
@@ -386,8 +343,8 @@ function renderDemand() {
     yAxis: { type: "value", scale: true, axisLabel: { color: css("--muted"), formatter: v => v.toFixed(2) }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => v.toFixed(3) },
     series: [
-      { name: "Casino coin-in per day", type: "line", data: C.casino_coin_in_per_day.map(v => v / C.casino_coin_in_per_day[0]), itemStyle: { color: pal().blue } },
-      { name: "Las Vegas visitors per day (LVCVA)", type: "line", data: C.lv_visitors_per_day.map(v => v / C.lv_visitors_per_day[0]), itemStyle: { color: pal().orange }, lineStyle: { type: "dashed" } },
+      { name: "Casino coin-in per day", type: "line", data: C.casino_coin_in_per_day.map(v => v / C.casino_coin_in_per_day[0]), itemStyle: { color: css("--green") } },
+      { name: "Las Vegas visitors per day (LVCVA)", type: "line", data: C.lv_visitors_per_day.map(v => v / C.lv_visitors_per_day[0]), itemStyle: { color: css("--gold") } },
     ],
   }));
 
@@ -412,7 +369,7 @@ function renderDemand() {
     yAxis: { type: "value", ...usdAxis, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => usd(v) },
     series: [0, 1].map(a => ({ name: a ? "After Mar 24" : "Before Mar 24", type: "bar",
-      itemStyle: { color: a ? pal().blue : pal().gray },
+      itemStyle: { color: a ? css("--green") : css("--gold") },
       data: [...names.map(k => per(k, a)), total(a)] })),
   }));
 }
@@ -445,19 +402,19 @@ function renderDowntime() {
     xAxis: { type: "category", data: ms.map(k => MONTH_LABEL[k]), axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", ...usdAxis, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => usd(v) },
-    series: MFRS.map(mf => ({ name: mf, type: "bar", stack: "a", itemStyle: { color: mfrColor(mf) },
+    series: Object.keys(MFR_COLORS).map(mf => ({ name: mf, type: "bar", stack: "a", itemStyle: { color: MFR_COLORS[mf] },
       data: ms.map(k => (lostMM[mf] || {})[k] || 0) })),
   }));
 
   const fc = {};
   fi.forEach(i => (fc[F.manufacturer[i]] = (fc[F.manufacturer[i]] || 0) + 1));
-  const mfs = MFRS;
+  const mfs = Object.keys(MFR_COLORS);
   set("c-rel", base({
     xAxis: { type: "category", data: mfs, axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", axisLabel: { color: css("--muted") }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", formatter: ps => { const m = ps[0].name;
       return `<b>${m}</b><br>${fix(ps[0].value, 1)} faults / 1,000 machine-days<br>${fc[m] || 0} faults over ${int(mdays[m] || 0)} machine-days`; } },
-    series: [{ type: "bar", data: mfs.map(m => ({ value: mdays[m] ? 1000 * (fc[m] || 0) / mdays[m] : 0, itemStyle: { color: mfrColor(m) } })),
+    series: [{ type: "bar", data: mfs.map(m => ({ value: mdays[m] ? 1000 * (fc[m] || 0) / mdays[m] : 0, itemStyle: { color: MFR_COLORS[m] } })),
       label: { show: true, position: "top", formatter: p => p.value.toFixed(1), color: css("--ink") }, barWidth: "45%" }],
   }));
 
@@ -473,9 +430,9 @@ function renderDowntime() {
     yAxis: { type: "value", min: 0, axisLabel: { color: css("--muted") }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => (v == null ? "–" : v.toFixed(2)) },
     series: ["day", "swing", "grave"].flatMap(s => [
-      { name: `${s} actual`, type: "line", itemStyle: { color: shiftColor(s) }, lineStyle: { width: 2.5 },
+      { name: `${s} actual`, type: "line", itemStyle: { color: SHIFT_COLORS[s] }, lineStyle: { width: 2.5 },
         data: ms.map(k => st[s + "|" + k] ? st[s + "|" + k][1] / st[s + "|" + k][2] : null) },
-      { name: `${s} planned`, type: "line", itemStyle: { color: shiftColor(s) }, lineStyle: { type: "dashed", width: 1.2 }, symbol: "none",
+      { name: `${s} planned`, type: "line", itemStyle: { color: SHIFT_COLORS[s] }, lineStyle: { type: "dashed", width: 1.2 }, symbol: "none",
         data: ms.map(k => st[s + "|" + k] ? st[s + "|" + k][0] / st[s + "|" + k][2] : null) },
     ]),
   }));
@@ -487,7 +444,7 @@ function renderDowntime() {
     xAxis: { type: "category", data: ms.map(k => MONTH_LABEL[k]), axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", axisLabel: { color: css("--muted") }, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => (v == null ? "–" : v.toFixed(2) + " h") },
-    series: shifts.map(s => ({ name: s.slice(2), type: "bar", itemStyle: { color: shiftColor(s.split(" ")[1].toLowerCase()) },
+    series: shifts.map(s => ({ name: s.slice(2), type: "bar", itemStyle: { color: SHIFT_COLORS[s.split(" ")[1].toLowerCase()] },
       data: ms.map(k => wt[s + "|" + k] ? wt[s + "|" + k][0] / wt[s + "|" + k][1] : null) })),
   }));
 }
@@ -513,7 +470,7 @@ function renderPlayers() {
     xAxis: { type: "category", data: dec.map((_, i) => i + 1), name: "Theo decile", nameLocation: "middle", nameGap: 26, axisLabel: { color: css("--muted") } },
     yAxis: { type: "value", ...usdAxis, splitLine: { lineStyle: { color: css("--line"), type: "dashed" } } },
     tooltip: { trigger: "axis", valueFormatter: v => usd(v) },
-    series: [{ type: "bar", name: "House win (−players' net)", data: dec, itemStyle: { color: p => (p.dataIndex === 0 ? pal().maroon : pal().blue), borderRadius: [2, 2, 0, 0] } }],
+    series: [{ type: "bar", name: "House win (−players' net)", data: dec, itemStyle: { color: css("--green"), borderRadius: [4, 4, 0, 0] } }],
   }));
 
   const tiers = [...new Set(P.tier)].sort(), tn = {}, tc = {};
@@ -524,8 +481,8 @@ function renderPlayers() {
             { type: "value", ...usdAxis, splitLine: { show: false } }],
     tooltip: { trigger: "axis", valueFormatter: v => usd(v) },
     series: [
-      { type: "bar", name: "Players' net", data: tiers.map(t => tn[t] || 0), itemStyle: { color: pal().blue } },
-      { type: "bar", name: "Comp cost (right axis)", yAxisIndex: 1, data: tiers.map(t => tc[t] || 0), itemStyle: { color: pal().orange } },
+      { type: "bar", name: "Players' net", data: tiers.map(t => tn[t] || 0), itemStyle: { color: css("--red") } },
+      { type: "bar", name: "Comp cost (right axis)", yAxisIndex: 1, data: tiers.map(t => tc[t] || 0), itemStyle: { color: css("--gold") } },
     ],
   }));
 }
@@ -538,7 +495,7 @@ function renderComps() {
     tooltip: { trigger: "axis", valueFormatter: v => Math.round(v) + " pts" },
     series: items.map(b => ({ name: b.replace("COMP-", "").toLowerCase(), type: "line",
       data: MONTHS.map(m => { const i = B.benefit_id.findIndex((x, j) => x === b && B.month[j] === m); return i < 0 ? null : B.points_per_redemption[i]; }),
-      markLine: b === items[0] ? { silent: true, symbol: "none", lineStyle: { color: css("--bad") }, label: { formatter: "May 1 price change", color: css("--bad") },
+      markLine: b === items[0] ? { silent: true, symbol: "none", lineStyle: { color: css("--red") }, label: { formatter: "May 1 price change", color: css("--red") },
         data: [{ xAxis: "May" }] } : undefined })),
   }));
   const C = TB.comp_month;
@@ -548,8 +505,8 @@ function renderComps() {
             { type: "value", min: 0.01, axisLabel: { color: css("--muted"), formatter: v => pct(v, 2) }, splitLine: { show: false } }],
     tooltip: { trigger: "axis" },
     series: [
-      { type: "bar", name: "Comp cost", data: C.comp_cost_usd, itemStyle: { color: pal().blue }, tooltip: { valueFormatter: v => usd(v) } },
-      { type: "line", name: "Reinvestment", yAxisIndex: 1, data: C.reinvestment, itemStyle: { color: pal().orange }, lineStyle: { width: 2.5 },
+      { type: "bar", name: "Comp cost", data: C.comp_cost_usd, itemStyle: { color: css("--gold") }, tooltip: { valueFormatter: v => usd(v) } },
+      { type: "line", name: "Reinvestment", yAxisIndex: 1, data: C.reinvestment, itemStyle: { color: css("--green") }, lineStyle: { width: 2.5 },
         tooltip: { valueFormatter: v => pct(v, 2) } },
     ],
   }));
@@ -565,12 +522,12 @@ function renderModel() {
     dataZoom: [{ type: "inside" }, { type: "slider", height: 18, bottom: 4 }],
     grid: { left: 64, right: 20, top: 36, bottom: 56 },
     series: [
-      { name: "Actual", type: "line", data: F.actual, showSymbol: false, lineStyle: { color: css("--ink"), width: 1.8 }, itemStyle: { color: css("--ink") },
-        markArea: { silent: true, itemStyle: { color: alpha(pal().gold, 0.16) }, data: [[{ xAxis: F.gaming_date[test0], name: "Holdout" }, { xAxis: F.gaming_date[F.gaming_date.length - 1] }]],
+      { name: "Actual", type: "line", data: F.actual, showSymbol: false, lineStyle: { color: css("--ink"), width: 2 }, itemStyle: { color: css("--ink") },
+        markArea: { silent: true, itemStyle: { color: "rgba(184,151,90,.18)" }, data: [[{ xAxis: F.gaming_date[test0], name: "Holdout" }, { xAxis: F.gaming_date[F.gaming_date.length - 1] }]],
           label: { color: css("--muted") } } },
-      { name: "Weekday + event uplift", type: "line", data: F.pred_weekday_event, showSymbol: false, itemStyle: { color: pal().green }, lineStyle: { width: 2 } },
-      { name: "Weekday mean (model)", type: "line", data: F.pred_weekday, showSymbol: false, itemStyle: { color: pal().blue }, lineStyle: { width: 1.4, type: "dashed" } },
-      { name: "Constant mean (baseline)", type: "line", data: F.pred_constant, showSymbol: false, itemStyle: { color: pal().orange }, lineStyle: { width: 1.4, type: "dotted" } },
+      { name: "Weekday + event uplift", type: "line", data: F.pred_weekday_event, showSymbol: false, itemStyle: { color: "#009E73" }, lineStyle: { width: 1.6 } },
+      { name: "Weekday mean (model)", type: "line", data: F.pred_weekday, showSymbol: false, itemStyle: { color: "#0072B2" }, lineStyle: { width: 1.4, type: "dashed" } },
+      { name: "Constant mean (baseline)", type: "line", data: F.pred_constant, showSymbol: false, itemStyle: { color: "#D55E00" }, lineStyle: { width: 1.4, type: "dotted" } },
     ],
   }));
   const S2 = TB.forecast_scores;
@@ -606,34 +563,7 @@ const RENDER = {
   players: renderPlayers, comps: renderComps, model: renderModel, evidence: renderEvidence,
 };
 
-// Which of the shared controls each tab responds to, and what the judge should know about the rest.
-const SCOPE = {
-  decision: { period: true, place: false, note: "Zone and Bank don't apply: the manager's list is floor-wide." },
-  machines: { period: true, place: true, note: "The heatmap always shows every zone so they can be compared." },
-  demand: { period: true, place: true, note: "Zone highlights a line in the weekly zone chart; Bank filters it. Event lift, city and new-bank charts use the full period." },
-  downtime: { period: true, place: true, note: "Technician staffing is floor-wide." },
-  players: { period: false, place: false, note: "This tab uses its own period and player filters (below)." },
-  comps: { period: false, place: false, note: "Always shows all six months, so the May 1 price change is visible." },
-  model: { period: false, place: false, note: "Always shows the full training and holdout split." },
-  evidence: { period: false, place: false, note: "Static list of claims." },
-};
-
-function renderScope() {
-  const sc = SCOPE[S.tab];
-  ["c-start", "c-end", "presets"].forEach(id => $(id).classList.toggle("off", !sc.period));
-  ["c-zone", "c-bank"].forEach(id => $(id).classList.toggle("off", !sc.place));
-  const fmt = d => new Date(BASE + d * 864e5).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-  const parts = [];
-  if (sc.period) parts.push(`<b>${fmt(S.s)} – ${fmt(S.e)}, 2025</b> (${S.e - S.s + 1} days)`);
-  if (sc.place) parts.push(`<b>${S.zone === "all" ? "all zones" : esc(S.zone)}</b>`, `<b>${S.bank === "all" ? "all banks" : esc(S.bank)}</b>`);
-  $("scope").innerHTML = (parts.length ? "Showing " + parts.join(" · ") + ". " : "") + esc(sc.note);
-}
-
 function render() {
-  const nb = document.querySelector(`#tabs button[data-t="${S.tab}"]`);
-  $("page-kicker").textContent = nb.dataset.kicker;
-  $("page-title").textContent = nb.dataset.title;
-  renderScope();
   RENDER[S.tab]();
   requestAnimationFrame(() => Object.values(charts).forEach(c => c.getDom().offsetParent && c.resize()));
 }
@@ -669,16 +599,6 @@ function init() {
     document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.id === "t-" + S.tab));
     history.replaceState(null, "", "#" + S.tab);
     render();
-  };
-  $("reset").onclick = () => {
-    S.zone = S.bank = "all"; $("zone").value = $("bank").value = "all";
-    setPeriod("2025-01-01", "2025-06-30");
-  };
-  document.querySelector(".guide").onclick = e => {
-    const b = e.target.closest("button[data-go]"); if (!b) return;
-    document.querySelector(`#tabs button[data-t="${b.dataset.go}"]`).click();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    if (b.dataset.focus) $(b.dataset.focus).focus({ preventScroll: true });
   };
   $("search").oninput = e => { S.q = e.target.value.toLowerCase(); renderMachines(); };
   $("scorecard").onclick = e => {
